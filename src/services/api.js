@@ -171,6 +171,17 @@ export const apiGetAllOrders = async () => {
   }
 };
 
+export const apiGetOrders = async (userId = 1) => {
+  try {
+    const response = await api.get(`/orders?userId=${userId}`);
+    if (response.data && response.data.length > 0) return response.data;
+  } catch (error) {
+    const db = getLocalDb();
+    if (db.orders) return db.orders.filter((o) => Number(o.userId) === Number(userId));
+  }
+  return apiGetAllOrders();
+};
+
 export const apiUpdateOrder = async (id, updatedData) => {
   try {
     const response = await api.put(`/orders/${id}`, updatedData);
