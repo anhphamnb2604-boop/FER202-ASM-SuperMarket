@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import {
   FiSearch,
   FiShoppingBag,
@@ -8,7 +9,9 @@ import {
 } from "react-icons/fi";
 import { apiGetProducts, apiGetCart, apiUpdateCart } from "../../services/api";
 
-const HomePage = ({ onCartChange = () => { } }) => {
+const HomePage = ({ onCartChange }) => {
+  const context = useOutletContext();
+  const triggerCartChange = onCartChange || context?.updateCartCount || (() => {});
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -58,7 +61,7 @@ const HomePage = ({ onCartChange = () => { } }) => {
       const updatedCart = { ...cart, items: updatedItems };
       await apiUpdateCart(cart.id, updatedCart);
 
-      onCartChange();
+      triggerCartChange();
       showToastNotification(
         "Đã thêm vào giỏ hàng!",
         `${product.name} đã được chọn.`
