@@ -1,19 +1,99 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import HomePage from "./pages/HomePage";
+import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Header from "./components/Header";
+import HomePage from "./pages/HomePage";
 import CartScreen from "./pages/CartScreen";
-import Checkout from "./pages/CheckoutPage";
-
+import CheckoutPage from "./pages/CheckoutPage";
+import AboutPage from "./pages/AboutPage";
+import LoginPage from "./pages/LoginPage";
+import { apiGetCart } from "./services/api";
 
 function App() {
+  const [cartCount, setCartCount] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  const userId = 1;
+
+  useEffect(() => {
+    // Check saved user session
+    const savedUser = localStorage.getItem("fer_current_user");
+    if (savedUser) {
+      try {
+        setCurrentUser(JSON.parse(savedUser));
+      } catch (e) {
+        console.error("Lỗi parse saved user", e);
+      }
+    }
+    updateCartCount();
+  }, []);
+
+  const updateCartCount = async () => {
+    try {
+      const carts = await apiGetCart(userId);
+      if (carts && carts.length > 0) {
+        const totalItems = (carts[0].items || []).reduce(
+          (sum, item) => sum + (item.quantity || 0),
+          0
+        );
+        setCartCount(totalItems);
+      } else {
+        setCartCount(0);
+      }
+    } catch (err) {
+      console.error("Lỗi get cart count:", err);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("fer_current_user");
+    setCurrentUser(null);
+  };
+
   return (
     <Router>
-      <Header />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/cart" element={<CartScreen />} />
-        <Route path="/checkout" element={<Checkout />} />
-      </Routes>
+      <Header
+        cartCount={cartCount}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+      />
+
+      <main className="min-vh-100 bg-light pb-5">
+        <Routes>
+          {/* 1. Trang Đăng Nhập */}
+          <Route
+            path="/login"
+            element={<LoginPage onLoginSuccess={(user) => setCurrentUser(user)} />}
+          />
+
+          {/* 2. Trang Chủ */}
+          <Route
+            path="/"
+            element={<HomePage onCartChange={updateCartCount} />}
+          />
+          <Route
+            path="/home"
+            element={<HomePage onCartChange={updateCartCount} />}
+          />
+
+          {/* 3. Trang Giỏ Hàng */}
+          <Route
+            path="/cart"
+            element={<CartScreen onCartChange={updateCartCount} />}
+          />
+
+          {/* 4. Trang Thanh Toán */}
+          <Route
+            path="/checkout"
+            element={<CheckoutPage onCartChange={updateCartCount} />}
+          />
+
+          {/* 5. Trang Giới Thiệu */}
+          <Route path="/about" element={<AboutPage />} />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
     </Router>
   );
 }

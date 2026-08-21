@@ -1,30 +1,36 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FiCheckCircle, FiCreditCard } from "react-icons/fi";
-import "./CheckoutPage.css";
-import axios from "axios";
+import {
+  FiCheckCircle,
+  FiCreditCard,
+  FiShield,
+  FiTruck,
+  FiArrowLeft
+} from "react-icons/fi";
+import { apiCreateOrder, apiUpdateCart } from "../services/api";
 
-const Checkout = () => {
+const CheckoutPage = ({ onCartChange = () => {} }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  
-  const [success, setSuccess] = useState(false);
+
   const [cart, setCart] = useState(null);
   const [products, setProducts] = useState([]);
-  
+  const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [success, setSuccess] = useState(false);
+  const [orderRef, setOrderRef] = useState("");
+
   const [formData, setFormData] = useState({
-    fullName: "",
-    phone: "",
-    address: ""
+    fullName: "Nguyễn Văn A",
+    phone: "0912345678",
+    address: "123 Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+    note: "Giao hàng giờ hành chính giúp mình nhé."
   });
 
   useEffect(() => {
-    // Nhận dữ liệu từ CartScreen thông qua location.state
     if (location.state && location.state.cart && location.state.products) {
       setCart(location.state.cart);
       setProducts(location.state.products);
     } else {
-      // Nếu không có dữ liệu (truy cập trực tiếp), quay lại giỏ hàng
       navigate("/cart");
     }
   }, [location, navigate]);
@@ -36,177 +42,297 @@ const Checkout = () => {
     });
   };
 
-  const handlePayment = async () => {
-    if (!formData.fullName || !formData.phone || !formData.address) {
-      alert("Vui lòng điền đầy đủ thông tin giao hàng!");
-      return;
-    }
-
-    // Ở đây bạn có thể gọi API để tạo đơn hàng mới,
-    // sau đó xóa giỏ hàng nếu muốn.
-    // Ví dụ xóa giỏ hàng:
-    try {
-      if (cart && cart.id) {
-        await axios.put(`http://localhost:9999/carts/${cart.id}`, { ...cart, items: [] });
-      }
-    } catch (error) {
-      console.error("Lỗi xóa giỏ hàng sau khi thanh toán:", error);
-    }
-
-    setSuccess(true);
-  };
-
-  const getProduct = (id) => products.find((p) => Number(p.id) === Number(id));
+  const getProduct = (id) =>
+    products.find((p) => String(p.id) === String(id));
 
   const subTotal = () => {
     if (!cart || !cart.items) return 0;
     return cart.items.reduce((sum, item) => {
-      const product = getProduct(item.productId);
-      if (!product) return sum;
-      return sum + product.price * item.quantity;
+      const prod = getProduct(item.productId);
+      if (!prod) return sum;
+      return sum + prod.price * item.quantity;
     }, 0);
   };
 
-  const shippingFee = () => {
-    return subTotal() > 500000 ? 0 : 30000;
+  const currentSubtotal = subTotal();
+  const shippingFee = currentSubtotal >= 500000 || currentSubtotal === 0 ? 0 : 30000;
+  const finalTotal = currentSubtotal + shippingFee;
+
+  const handleProcessOrder = async () => {
+    if (!formData.fullName || !formData.phone || !formData.address) {
+      alert("Vui lòng điền đầy đủ Họ tên, Số điện thoại và Địa chỉ giao hàng!");
+      return;
+    }
+
+    const newOrderRef = `ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+
+    const orderData = {
+      userId: 1,
+      totalAmount: finalTotal,
+      status: "completed",
+      createdAt: new Date().toISOString().split("T")[0],
+      shippingAddress: formData.address,
+      recipientName: formData.fullName,
+      phone: formData.phone,
+      paymentMethod,
+      orderRef: newOrderRef,
+      items: cart.items.map((item) => {
+        const prod = getProduct(item.productId);
+        return {
+          productId: item.productId,
+          productName: prod ? prod.name : "Sản phẩm",
+          quantity: item.quantity,
+          price: prod ? prod.price : 0
+        };
+      })
+    };
+
+    try {
+      await apiCreateOrder(orderData);
+      if (cart && cart.id) {
+        await apiUpdateCart(cart.id, { ...cart, items: [] });
+      }
+      onCartChange();
+      setOrderRef(newOrderRef);
+      setSuccess(true);
+    } catch (err) {
+      console.error("Lỗi đặt hàng:", err);
+    }
   };
 
-  const finalTotal = subTotal() + shippingFee();
-
-  if (!cart) {
+  if (success) {
     return (
-      <div className="checkout-wrapper">
-        <h2 style={{ color: '#2c3e50', textAlign: 'center', marginTop: '50px' }}>Đang tải thông tin thanh toán...</h2>
-      </div>
-    );
-  }
+      <div className="container py-5">
+        <div className="bg-white p-5 rounded-4 shadow-sm text-center mx-auto" style={{ maxWidth: 640 }}>
+          <div
+            className="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+            style={{ width: 80, height: 80 }}
+          >
+            <FiCheckCircle size={44} />
+          </div>
+          <h2 className="fw-extrabold text-dark mb-2">Đặt Hàng Thành Công!</h2>
+          <span className="badge bg-success px-3 py-2 rounded-pill fs-6 mb-3">
+            Mã đơn hàng: #{orderRef}
+          </span>
 
-  // Nếu người dùng xóa hết giỏ hàng thì không cần thanh toán
-  if (cart.items.length === 0 && !success) {
-    return (
-      <div className="checkout-wrapper">
-        <div style={{ textAlign: "center", width: "100%", marginTop: "50px" }}>
-          <h2 style={{ color: '#2c3e50', marginBottom: '20px' }}>Giỏ hàng của bạn đang trống</h2>
-          <button className="back-home-btn" onClick={() => navigate("/")}>Về trang chủ</button>
-        </div>
-      </div>
-    );
-  }
+          <p className="text-muted mb-4">
+            Cảm ơn <strong className="text-dark">{formData.fullName}</strong> đã lựa chọn mua sắm tại FerSe1990 Supermarket!
+          </p>
 
-  return (
-    <div className="checkout-wrapper">
-      {success ? (
-        <div className="success-container">
-          <div className="success-card">
-            <div className="success-icon">
-              <FiCheckCircle />
+          <div className="bg-light p-4 rounded-3 text-start mb-4 border">
+            <div className="mb-2">
+              <strong className="text-dark">Địa chỉ nhận hàng:</strong> {formData.address}
             </div>
-            <h1>Thanh toán thành công!</h1>
-            <p>
-              Cảm ơn <strong>{formData.fullName}</strong> đã đặt hàng.<br/>
-              Đơn hàng của bạn sẽ được giao đến địa chỉ:<br/>
-              <strong>{formData.address}</strong> trong thời gian sớm nhất.
-            </p>
-            <button onClick={() => navigate("/")} className="back-home-btn">
-              Trở về trang chủ
+            <div className="mb-2">
+              <strong className="text-dark">Số điện thoại:</strong> {formData.phone}
+            </div>
+            <div className="mb-2">
+              <strong className="text-dark">Phương thức:</strong>{" "}
+              {paymentMethod === "cod"
+                ? "Thanh toán khi nhận hàng (COD)"
+                : paymentMethod === "momo"
+                ? "Ví điện tử MoMo"
+                : "Thẻ ngân hàng / Thẻ quốc tế"}
+            </div>
+            <div>
+              <strong className="text-dark">Dự kiến giao hàng:</strong> Trong 2 giờ (Trước 17h00 hôm nay)
+            </div>
+          </div>
+
+          <div className="d-flex flex-wrap gap-2 justify-content-center">
+            <button
+              className="btn btn-success fw-bold px-4 py-2.5 rounded-3 shadow-sm"
+              onClick={() => navigate("/home")}
+            >
+              Tiếp Tục Mua Sắm
+            </button>
+            <button
+              className="btn btn-outline-secondary fw-semibold px-4 py-2.5 rounded-3"
+              onClick={() => navigate("/about")}
+            >
+              Về Chúng Tôi
             </button>
           </div>
         </div>
-      ) : (
-        <div className="checkout-inner">
-          <div className="checkout-section">
-            <h2>Thông tin giao hàng</h2>
-            <div className="checkout-form">
-              <div className="input-group">
-                <label>Họ và tên</label>
-                <input 
-                  type="text" 
+      </div>
+    );
+  }
+
+  const items = cart?.items || [];
+
+  return (
+    <div className="container py-4">
+      <div className="mb-3">
+        <button
+          className="btn btn-sm btn-light border fw-semibold text-secondary d-inline-flex align-items-center gap-1"
+          onClick={() => navigate("/cart")}
+        >
+          <FiArrowLeft /> Quay lại giỏ hàng
+        </button>
+      </div>
+
+      <div className="row g-4">
+        {/* Left Column: Delivery Form */}
+        <div className="col-lg-7">
+          <div className="bg-white p-4 rounded-4 shadow-sm">
+            <h5 className="fw-bold text-dark d-flex align-items-center gap-2 mb-4">
+              <FiTruck className="text-success" /> Thông Tin Giao Hàng & Thanh Toán
+            </h5>
+
+            <div className="row g-3 mb-3">
+              <div className="col-md-6">
+                <label className="form-label fw-bold small text-secondary">Họ và tên người nhận *</label>
+                <input
+                  type="text"
+                  className="form-control rounded-3"
                   name="fullName"
-                  className="checkout-input" 
-                  placeholder="Nhập họ và tên người nhận"
                   value={formData.fullName}
                   onChange={handleInputChange}
+                  placeholder="Nhập họ và tên..."
                 />
               </div>
-              <div className="input-group">
-                <label>Số điện thoại</label>
-                <input 
-                  type="text" 
+              <div className="col-md-6">
+                <label className="form-label fw-bold small text-secondary">Số điện thoại liên hệ *</label>
+                <input
+                  type="text"
+                  className="form-control rounded-3"
                   name="phone"
-                  className="checkout-input" 
-                  placeholder="Nhập số điện thoại liên hệ"
                   value={formData.phone}
                   onChange={handleInputChange}
+                  placeholder="Nhập số điện thoại..."
                 />
               </div>
-              <div className="input-group">
-                <label>Địa chỉ giao hàng</label>
-                <input 
-                  type="text" 
-                  name="address"
-                  className="checkout-input" 
-                  placeholder="Nhập địa chỉ nhà, tên đường, phường/xã..."
-                  value={formData.address}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div className="payment-method">
-                <h3>Phương thức thanh toán</h3>
-                <div className="method-card active">
-                  <div className="radio-custom"></div>
-                  <div className="method-name">Thanh toán khi nhận hàng (COD)</div>
-                </div>
-              </div>
-
-              <button className="confirm-pay-btn" onClick={handlePayment}>
-                <FiCreditCard size={20} style={{ marginRight: '10px' }}/>
-                Xác nhận đặt hàng - {finalTotal.toLocaleString("vi-VN")} đ
-              </button>
             </div>
-          </div>
 
-          <div className="checkout-section">
-            <h3>Đơn hàng của bạn</h3>
-            
-            <div className="summary-items">
-              {cart.items.map((item) => {
+            <div className="mb-3">
+              <label className="form-label fw-bold small text-secondary">Địa chỉ nhận hàng chi tiết *</label>
+              <input
+                type="text"
+                className="form-control rounded-3"
+                name="address"
+                value={formData.address}
+                onChange={handleInputChange}
+                placeholder="Nhập số nhà, tên đường, phường/xã, quận/huyện..."
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="form-label fw-bold small text-secondary">Ghi chú đơn hàng (Tùy chọn)</label>
+              <textarea
+                className="form-control rounded-3"
+                rows="3"
+                name="note"
+                value={formData.note}
+                onChange={handleInputChange}
+                placeholder="Lời nhắn cho shipper hoặc thời gian nhận hàng..."
+              ></textarea>
+            </div>
+
+            <h6 className="fw-bold text-dark mb-3">Phương thức thanh toán</h6>
+
+            <div className="d-flex flex-column gap-2 mb-4">
+              <div
+                className={`p-3 rounded-3 border cursor-pointer d-flex align-items-center gap-3 ${
+                  paymentMethod === "cod" ? "border-success bg-success bg-opacity-10 fw-bold text-success" : "bg-light text-dark"
+                }`}
+                onClick={() => setPaymentMethod("cod")}
+              >
+                <input type="radio" checked={paymentMethod === "cod"} readOnly />
+                <span>💵 COD (Thanh toán khi nhận hàng)</span>
+              </div>
+
+              <div
+                className={`p-3 rounded-3 border cursor-pointer d-flex align-items-center gap-3 ${
+                  paymentMethod === "momo" ? "border-success bg-success bg-opacity-10 fw-bold text-success" : "bg-light text-dark"
+                }`}
+                onClick={() => setPaymentMethod("momo")}
+              >
+                <input type="radio" checked={paymentMethod === "momo"} readOnly />
+                <span>📱 Ví MoMo</span>
+              </div>
+
+              <div
+                className={`p-3 rounded-3 border cursor-pointer d-flex align-items-center gap-3 ${
+                  paymentMethod === "bank" ? "border-success bg-success bg-opacity-10 fw-bold text-success" : "bg-light text-dark"
+                }`}
+                onClick={() => setPaymentMethod("bank")}
+              >
+                <input type="radio" checked={paymentMethod === "bank"} readOnly />
+                <span>💳 Thẻ ATM / Visa / Master</span>
+              </div>
+            </div>
+
+            <button
+              className="btn btn-success w-100 py-3 fw-bold rounded-3 d-flex align-items-center justify-content-center gap-2 shadow-sm fs-6"
+              onClick={handleProcessOrder}
+            >
+              <FiCreditCard size={20} />
+              Xác Nhận Đặt Hàng - {finalTotal.toLocaleString("vi-VN")} đ
+            </button>
+          </div>
+        </div>
+
+        {/* Right Column: Order Items Summary */}
+        <div className="col-lg-5">
+          <div className="bg-white p-4 rounded-4 shadow-sm sticky-top" style={{ top: 84 }}>
+            <h5 className="fw-bold text-dark d-flex align-items-center gap-2 mb-3">
+              <FiShield className="text-success" /> Đơn Hàng Của Bạn ({items.length} món)
+            </h5>
+
+            <div className="d-flex flex-column gap-3 mb-3" style={{ maxHeight: 280, overflowY: "auto" }}>
+              {items.map((item) => {
                 const product = getProduct(item.productId);
                 if (!product) return null;
+                const lineTotal = product.price * item.quantity;
                 return (
-                  <div key={item.productId} className="summary-item">
-                    <img src={product.image} alt={product.name} className="summary-item-img" />
-                    <div className="summary-item-info">
-                      <p className="summary-item-name">{product.name}</p>
-                      <p className="summary-item-qty">Số lượng: {item.quantity}</p>
+                  <div className="d-flex align-items-center gap-3 border-bottom pb-2" key={item.productId}>
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="rounded-2 object-fit-cover"
+                      style={{ width: 48, height: 48 }}
+                      onError={(e) => {
+                        e.target.src = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop&q=60";
+                      }}
+                    />
+                    <div className="flex-grow-1">
+                      <div className="fw-bold small text-dark">{product.name}</div>
+                      <div className="text-muted small">
+                        SL: {item.quantity} x {product.price.toLocaleString("vi-VN")} đ
+                      </div>
                     </div>
-                    <div className="summary-item-price">
-                      {(product.price * item.quantity).toLocaleString("vi-VN")} đ
+                    <div className="fw-bold text-success small">
+                      {lineTotal.toLocaleString("vi-VN")} đ
                     </div>
                   </div>
                 );
               })}
             </div>
 
-            <div className="summary-totals">
-              <div className="summary-row">
-                <span>Tạm tính ({cart.items.length} sản phẩm)</span>
-                <span>{subTotal().toLocaleString("vi-VN")} đ</span>
-              </div>
-              <div className="summary-row">
-                <span>Phí vận chuyển</span>
-                <span>{shippingFee().toLocaleString("vi-VN")} đ</span>
-              </div>
-              <div className="summary-row total">
-                <span>Tổng thanh toán</span>
-                <span>{finalTotal.toLocaleString("vi-VN")} đ</span>
-              </div>
+            <div className="d-flex justify-content-between text-secondary mb-2 small">
+              <span>Tạm tính</span>
+              <span className="fw-semibold text-dark">{currentSubtotal.toLocaleString("vi-VN")} đ</span>
+            </div>
+            <div className="d-flex justify-content-between text-secondary mb-2 small">
+              <span>Phí vận chuyển</span>
+              <span>
+                {shippingFee === 0 ? (
+                  <strong className="text-success">Miễn phí</strong>
+                ) : (
+                  `${shippingFee.toLocaleString("vi-VN")} đ`
+                )}
+              </span>
+            </div>
+            <hr />
+            <div className="d-flex justify-content-between align-items-baseline">
+              <span className="fw-bold text-dark">Tổng số tiền</span>
+              <span className="fs-4 fw-extrabold text-success">{finalTotal.toLocaleString("vi-VN")} đ</span>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
-export default Checkout;
+export default CheckoutPage;
