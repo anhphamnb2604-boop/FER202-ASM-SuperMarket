@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from "react";
 import {
+  Container,
+  Row,
+  Col,
+  Card,
+  ProgressBar,
+  Badge,
+  Button,
+  Spinner
+} from "react-bootstrap";
+import {
   FiPieChart,
   FiBox,
   FiFileText,
   FiDollarSign,
-  FiTrendingUp,
   FiAlertTriangle,
   FiCheckCircle,
   FiDownload,
@@ -33,17 +42,14 @@ const AdminReportsPage = () => {
     setLoading(false);
   };
 
-  // Calculations
   const totalProducts = products.length;
   const totalStock = products.reduce((sum, p) => sum + (Number(p.stock) || 0), 0);
   const totalOrders = orders.length;
   const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
   const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
 
-  // Low Stock Items (< 15 items)
   const lowStockProducts = products.filter((p) => Number(p.stock) < 15);
 
-  // Breakdown by Category
   const fruitProducts = products.filter((p) => Number(p.categoryId) === 1);
   const drinkProducts = products.filter((p) => Number(p.categoryId) === 2);
   const foodProducts = products.filter((p) => Number(p.categoryId) === 3);
@@ -72,7 +78,7 @@ ${lowStockProducts.map((p) => `- ${p.name} (Tồn kho: ${p.stock})`).join("\n")}
   };
 
   return (
-    <div className="container pb-5">
+    <Container className="pb-5">
       {/* Header Bar */}
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
@@ -84,25 +90,26 @@ ${lowStockProducts.map((p) => `- ${p.name} (Tồn kho: ${p.stock})`).join("\n")}
           </p>
         </div>
 
-        <button
-          className="btn btn-success fw-bold px-4 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2"
+        <Button
+          variant="success"
+          className="fw-bold px-4 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2"
           onClick={handleExportReport}
         >
           <FiDownload size={18} /> Xuất Báo Cáo File Text
-        </button>
+        </Button>
       </div>
 
       {loading ? (
         <div className="text-center py-5 text-muted">
-          <div className="spinner-border text-success mb-2" role="status"></div>
+          <Spinner animation="border" variant="success" className="mb-2" />
           <h5>Đang tính toán số liệu thống kê...</h5>
         </div>
       ) : (
         <>
           {/* KPI Summary Cards */}
-          <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-3 mb-4">
-            <div className="col">
-              <div className="bg-white p-4 rounded-4 shadow-sm border-start border-4 border-success">
+          <Row xs={1} sm={2} lg={4} className="g-3 mb-4">
+            <Col>
+              <Card className="p-3.5 border-0 rounded-4 shadow-sm border-start border-4 border-success">
                 <div className="d-flex align-items-center justify-content-between mb-2">
                   <span className="text-muted fw-bold small uppercase">Tổng Sản Phẩm</span>
                   <div className="bg-success bg-opacity-10 text-success rounded-circle p-2.5">
@@ -111,11 +118,11 @@ ${lowStockProducts.map((p) => `- ${p.name} (Tồn kho: ${p.stock})`).join("\n")}
                 </div>
                 <h3 className="fw-extrabold text-dark m-0">{totalProducts} món</h3>
                 <small className="text-success fw-semibold">Đã phân loại danh mục</small>
-              </div>
-            </div>
+              </Card>
+            </Col>
 
-            <div className="col">
-              <div className="bg-white p-4 rounded-4 shadow-sm border-start border-4 border-info">
+            <Col>
+              <Card className="p-3.5 border-0 rounded-4 shadow-sm border-start border-4 border-info">
                 <div className="d-flex align-items-center justify-content-between mb-2">
                   <span className="text-muted fw-bold small uppercase">Tổng Tồn Kho</span>
                   <div className="bg-info bg-opacity-10 text-info rounded-circle p-2.5">
@@ -124,11 +131,11 @@ ${lowStockProducts.map((p) => `- ${p.name} (Tồn kho: ${p.stock})`).join("\n")}
                 </div>
                 <h3 className="fw-extrabold text-dark m-0">{totalStock} món</h3>
                 <small className="text-info fw-semibold">Có sẵn trong kho hàng</small>
-              </div>
-            </div>
+              </Card>
+            </Col>
 
-            <div className="col">
-              <div className="bg-white p-4 rounded-4 shadow-sm border-start border-4 border-warning">
+            <Col>
+              <Card className="p-3.5 border-0 rounded-4 shadow-sm border-start border-4 border-warning">
                 <div className="d-flex align-items-center justify-content-between mb-2">
                   <span className="text-muted fw-bold small uppercase">Đơn Hàng Khách Đặt</span>
                   <div className="bg-warning bg-opacity-10 text-warning rounded-circle p-2.5">
@@ -137,11 +144,11 @@ ${lowStockProducts.map((p) => `- ${p.name} (Tồn kho: ${p.stock})`).join("\n")}
                 </div>
                 <h3 className="fw-extrabold text-dark m-0">{totalOrders} đơn</h3>
                 <small className="text-warning fw-semibold">TB {avgOrderValue.toLocaleString("vi-VN")} đ/đơn</small>
-              </div>
-            </div>
+              </Card>
+            </Col>
 
-            <div className="col">
-              <div className="bg-white p-4 rounded-4 shadow-sm border-start border-4 border-primary">
+            <Col>
+              <Card className="p-3.5 border-0 rounded-4 shadow-sm border-start border-4 border-primary">
                 <div className="d-flex align-items-center justify-content-between mb-2">
                   <span className="text-muted fw-bold small uppercase">Tổng Doanh Thu</span>
                   <div className="bg-primary bg-opacity-10 text-primary rounded-circle p-2.5">
@@ -150,14 +157,14 @@ ${lowStockProducts.map((p) => `- ${p.name} (Tồn kho: ${p.stock})`).join("\n")}
                 </div>
                 <h3 className="fw-extrabold text-success m-0">{totalRevenue.toLocaleString("vi-VN")} đ</h3>
                 <small className="text-primary fw-semibold">Cập nhật theo thời gian thực</small>
-              </div>
-            </div>
-          </div>
+              </Card>
+            </Col>
+          </Row>
 
-          <div className="row g-4">
+          <Row className="g-4">
             {/* Left Column: Category Breakdown */}
-            <div className="col-lg-6">
-              <div className="bg-white p-4 rounded-4 shadow-sm h-100">
+            <Col lg={6}>
+              <Card className="p-4 border-0 rounded-4 shadow-sm h-100">
                 <h5 className="fw-bold text-dark d-flex align-items-center gap-2 mb-4">
                   <FiTag className="text-success" /> Thống Kê Sản Phẩm Theo Danh Mục
                 </h5>
@@ -168,12 +175,7 @@ ${lowStockProducts.map((p) => `- ${p.name} (Tồn kho: ${p.stock})`).join("\n")}
                       <span className="text-dark">🍎 Hoa Quả Tươi</span>
                       <span className="text-success">{fruitProducts.length} sản phẩm ({Math.round((fruitProducts.length / (totalProducts || 1)) * 100)}%)</span>
                     </div>
-                    <div className="progress rounded-pill" style={{ height: 10 }}>
-                      <div
-                        className="progress-bar bg-success rounded-pill"
-                        style={{ width: `${Math.round((fruitProducts.length / (totalProducts || 1)) * 100)}%` }}
-                      ></div>
-                    </div>
+                    <ProgressBar variant="success" now={Math.round((fruitProducts.length / (totalProducts || 1)) * 100)} className="rounded-pill" style={{ height: 10 }} />
                   </div>
 
                   <div>
@@ -181,12 +183,7 @@ ${lowStockProducts.map((p) => `- ${p.name} (Tồn kho: ${p.stock})`).join("\n")}
                       <span className="text-dark">🥤 Thức Uống</span>
                       <span className="text-info">{drinkProducts.length} sản phẩm ({Math.round((drinkProducts.length / (totalProducts || 1)) * 100)}%)</span>
                     </div>
-                    <div className="progress rounded-pill" style={{ height: 10 }}>
-                      <div
-                        className="progress-bar bg-info rounded-pill"
-                        style={{ width: `${Math.round((drinkProducts.length / (totalProducts || 1)) * 100)}%` }}
-                      ></div>
-                    </div>
+                    <ProgressBar variant="info" now={Math.round((drinkProducts.length / (totalProducts || 1)) * 100)} className="rounded-pill" style={{ height: 10 }} />
                   </div>
 
                   <div>
@@ -194,20 +191,15 @@ ${lowStockProducts.map((p) => `- ${p.name} (Tồn kho: ${p.stock})`).join("\n")}
                       <span className="text-dark">🥖 Đồ Ăn & Thực Phẩm</span>
                       <span className="text-warning">{foodProducts.length} sản phẩm ({Math.round((foodProducts.length / (totalProducts || 1)) * 100)}%)</span>
                     </div>
-                    <div className="progress rounded-pill" style={{ height: 10 }}>
-                      <div
-                        className="progress-bar bg-warning rounded-pill"
-                        style={{ width: `${Math.round((foodProducts.length / (totalProducts || 1)) * 100)}%` }}
-                      ></div>
-                    </div>
+                    <ProgressBar variant="warning" now={Math.round((foodProducts.length / (totalProducts || 1)) * 100)} className="rounded-pill" style={{ height: 10 }} />
                   </div>
                 </div>
-              </div>
-            </div>
+              </Card>
+            </Col>
 
             {/* Right Column: Low Stock Alert List */}
-            <div className="col-lg-6">
-              <div className="bg-white p-4 rounded-4 shadow-sm h-100">
+            <Col lg={6}>
+              <Card className="p-4 border-0 rounded-4 shadow-sm h-100">
                 <h5 className="fw-bold text-dark d-flex align-items-center gap-2 mb-4">
                   <FiAlertTriangle className="text-danger" /> Cảnh Báo Sản Phẩm Sắp Hết Hàng (&lt;15 món)
                 </h5>
@@ -236,19 +228,19 @@ ${lowStockProducts.map((p) => `- ${p.name} (Tồn kho: ${p.stock})`).join("\n")}
                             <div className="text-muted fs-7">{p.price.toLocaleString("vi-VN")} đ</div>
                           </div>
                         </div>
-                        <span className="badge bg-danger text-white fw-bold px-3 py-1.5 rounded-pill">
+                        <Badge bg="danger" className="fw-bold px-3 py-1.5 rounded-pill">
                           Còn {p.stock || 0} món
-                        </span>
+                        </Badge>
                       </div>
                     ))}
                   </div>
                 )}
-              </div>
-            </div>
-          </div>
+              </Card>
+            </Col>
+          </Row>
         </>
       )}
-    </div>
+    </Container>
   );
 };
 

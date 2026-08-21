@@ -1,5 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Table,
+  Button,
+  Form,
+  Modal,
+  Badge,
+  Alert,
+  InputGroup,
+  Spinner
+} from "react-bootstrap";
+import {
   FiPlus,
   FiEdit2,
   FiTrash2,
@@ -162,57 +176,54 @@ const AdminProductsPage = () => {
   });
 
   return (
-    <div className="container pb-5">
-      {/* Alert Notification */}
+    <Container className="pb-5">
+      {/* Notification Alert */}
       {alert.show && (
-        <div className={`alert alert-${alert.type} d-flex align-items-center mb-4 shadow-sm rounded-3`}>
-          {alert.type === "success" ? (
-            <FiCheckCircle className="me-2 fs-4 text-success" />
-          ) : (
-            <FiXCircle className="me-2 fs-4 text-danger" />
-          )}
+        <Alert variant={alert.type} dismissible onClose={() => setAlert({ show: false })} className="d-flex align-items-center gap-2 shadow-sm rounded-3">
+          {alert.type === "success" ? <FiCheckCircle size={20} /> : <FiXCircle size={20} />}
           <div className="fw-bold">{alert.msg}</div>
-        </div>
+        </Alert>
       )}
 
-      {/* Header Bar */}
+      {/* Header Title & Create Button */}
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
           <h3 className="fw-extrabold text-dark d-flex align-items-center gap-2 m-0">
             <FiBox className="text-success" /> Quản Lý Danh Sách Sản Phẩm
           </h3>
           <p className="text-muted small m-0 mt-1">
-            Thực hiện các thao tác Thêm (POST), Sửa (PUT), Xóa (DELETE) sản phẩm siêu thị
+            Thao tác CRUD trực tiếp: Thêm mới (POST), Cập nhật (PUT), Xóa (DELETE)
           </p>
         </div>
 
-        <button
-          className="btn btn-success fw-bold px-4 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2"
+        <Button
+          variant="success"
+          className="fw-bold px-4 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2"
           onClick={handleOpenCreate}
         >
           <FiPlus size={18} /> Thêm Sản Phẩm Mới
-        </button>
+        </Button>
       </div>
 
-      {/* Main Panel Card */}
-      <div className="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
-        {/* Search, Filter & View Controls */}
-        <div className="card-body bg-light border-bottom p-3 d-flex flex-wrap align-items-center gap-3">
-          <div className="input-group" style={{ maxWidth: 360 }}>
-            <span className="input-group-text bg-white border-end-0">
+      {/* Main Content Card */}
+      <Card className="border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        {/* Toolbar Controls */}
+        <Card.Body className="bg-light border-bottom p-3 d-flex flex-wrap align-items-center gap-3">
+          <InputGroup style={{ maxWidth: 340 }}>
+            <InputGroup.Text className="bg-white border-end-0">
               <FiSearch className="text-muted" />
-            </span>
-            <input
+            </InputGroup.Text>
+            <Form.Control
               type="text"
-              className="form-control border-start-0 ps-0 bg-white"
-              placeholder="Tìm kiếm sản phẩm theo tên..."
+              placeholder="Tìm kiếm sản phẩm..."
+              className="border-start-0 ps-0 bg-white"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-          </div>
+          </InputGroup>
 
-          <select
-            className="form-select w-auto fw-semibold border-1 rounded-3"
+          <Form.Select
+            className="w-auto fw-semibold border-1 rounded-3"
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
           >
@@ -220,340 +231,265 @@ const AdminProductsPage = () => {
             <option value="1">🍎 Hoa quả tươi</option>
             <option value="2">🥤 Thức uống</option>
             <option value="3">🥖 Đồ ăn & Thực phẩm</option>
-          </select>
+          </Form.Select>
 
-          <button
-            className="btn btn-white border d-flex align-items-center gap-1 fw-semibold text-secondary rounded-3"
-            onClick={loadProducts}
-          >
+          <Button variant="outline-secondary" className="d-flex align-items-center gap-1 bg-white fw-semibold rounded-3" onClick={loadProducts}>
             <FiRefreshCw /> Tải lại
-          </button>
+          </Button>
 
           <div className="d-flex align-items-center gap-1 bg-white rounded-pill p-1 border ms-auto">
-            <button
-              className={`btn btn-sm rounded-pill px-3 fw-bold ${
-                viewMode === "table" ? "btn-success" : "btn-light text-secondary border-0"
-              }`}
+            <Button
+              size="sm"
+              variant={viewMode === "table" ? "success" : "light"}
+              className="rounded-pill px-3 fw-bold"
               onClick={() => setViewMode("table")}
             >
               <FiList /> Dạng Bảng
-            </button>
-            <button
-              className={`btn btn-sm rounded-pill px-3 fw-bold ${
-                viewMode === "grid" ? "btn-success" : "btn-light text-secondary border-0"
-              }`}
+            </Button>
+            <Button
+              size="sm"
+              variant={viewMode === "grid" ? "success" : "light"}
+              className="rounded-pill px-3 fw-bold"
               onClick={() => setViewMode("grid")}
             >
               <FiGrid /> Dạng Thẻ
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card.Body>
 
-        {/* Content View: Table or Grid */}
+        {/* View Content */}
         {loading ? (
           <div className="text-center py-5 text-muted">
-            <div className="spinner-border text-success mb-2" role="status"></div>
-            <h5>Đang tải dữ liệu sản phẩm...</h5>
+            <Spinner animation="border" variant="success" className="mb-2" />
+            <h5>Đang tải danh sách sản phẩm...</h5>
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-5">
             <h5 className="fw-bold text-dark">Không có sản phẩm nào phù hợp</h5>
-            <p className="text-muted small">Vui lòng thử tìm kiếm với từ khóa khác.</p>
+            <p className="text-muted small">Thử thay đổi từ khóa tìm kiếm hoặc bấm Thêm sản phẩm mới.</p>
           </div>
         ) : viewMode === "table" ? (
-          <div className="table-responsive">
-            <table className="table table-hover align-middle mb-0">
-              <thead className="table-light">
-                <tr className="small text-secondary">
-                  <th className="ps-4">ID</th>
-                  <th>Hình ảnh</th>
-                  <th>Tên sản phẩm</th>
-                  <th>Danh mục</th>
-                  <th>Giá bán (VND)</th>
-                  <th>Tồn kho</th>
-                  <th className="text-center">Thao tác (CRUD)</th>
+          <Table responsive hover align="middle" className="mb-0">
+            <thead className="table-light">
+              <tr className="small text-secondary">
+                <th className="ps-4">ID</th>
+                <th>Hình ảnh</th>
+                <th>Tên sản phẩm</th>
+                <th>Danh mục</th>
+                <th>Giá bán</th>
+                <th>Tồn kho</th>
+                <th className="text-center">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredProducts.map((item) => (
+                <tr key={item.id}>
+                  <td className="ps-4 fw-bold text-secondary">#{item.id}</td>
+                  <td>
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="rounded-3 object-fit-cover"
+                      style={{ width: 46, height: 46 }}
+                      onError={(e) => {
+                        e.target.src = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop&q=60";
+                      }}
+                    />
+                  </td>
+                  <td>
+                    <div className="fw-bold text-dark">{item.name}</div>
+                    <div className="text-muted small text-truncate" style={{ maxWidth: 240 }}>
+                      {item.description || "Không có mô tả"}
+                    </div>
+                  </td>
+                  <td>
+                    <Badge bg="success" className="bg-opacity-10 text-success px-3 py-2 rounded-pill">
+                      {getCategoryName(item.categoryId)}
+                    </Badge>
+                  </td>
+                  <td className="fw-bold text-success">{item.price.toLocaleString("vi-VN")} đ</td>
+                  <td>
+                    {item.stock < 15 ? (
+                      <Badge bg="danger" className="bg-opacity-10 text-danger px-2.5 py-1.5 rounded-pill">
+                        ⚠️ Sắp hết ({item.stock || 0})
+                      </Badge>
+                    ) : (
+                      <span className="fw-semibold text-secondary">{item.stock || 100} món</span>
+                    )}
+                  </td>
+                  <td>
+                    <div className="d-flex justify-content-center gap-2">
+                      <Button variant="outline-success" size="sm" className="fw-semibold rounded-3 d-flex align-items-center gap-1" onClick={() => handleOpenEdit(item)}>
+                        <FiEdit2 /> Sửa
+                      </Button>
+                      <Button variant="outline-danger" size="sm" className="fw-semibold rounded-3 d-flex align-items-center gap-1" onClick={() => { setDeleteItem(item); setShowDeleteModal(true); }}>
+                        <FiTrash2 /> Xóa
+                      </Button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {filteredProducts.map((item) => (
-                  <tr key={item.id}>
-                    <td className="ps-4 fw-bold text-secondary">#{item.id}</td>
-                    <td>
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="rounded-3 object-fit-cover"
-                        style={{ width: 48, height: 48 }}
-                        onError={(e) => {
-                          e.target.src =
-                            "https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop&q=60";
-                        }}
-                      />
-                    </td>
-                    <td>
-                      <div className="fw-bold text-dark">{item.name}</div>
-                      <div className="text-muted small text-truncate" style={{ maxWidth: 260 }}>
-                        {item.description || "Không có mô tả"}
-                      </div>
-                    </td>
-                    <td>
-                      <span className="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-2 rounded-pill">
-                        {getCategoryName(item.categoryId)}
-                      </span>
-                    </td>
-                    <td className="fw-bold text-success">
-                      {item.price.toLocaleString("vi-VN")} đ
-                    </td>
-                    <td>
-                      {item.stock < 15 ? (
-                        <span className="badge bg-danger bg-opacity-10 text-danger fw-bold px-2.5 py-1.5 rounded-pill">
-                          ⚠️ Sắp hết ({item.stock || 0})
-                        </span>
-                      ) : (
-                        <span className="fw-semibold text-secondary">
-                          {item.stock || 100} món
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      <div className="d-flex justify-content-center gap-2">
-                        <button
-                          className="btn btn-sm btn-outline-success fw-semibold d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-3"
-                          onClick={() => handleOpenEdit(item)}
-                        >
-                          <FiEdit2 /> Sửa
-                        </button>
-                        <button
-                          className="btn btn-sm btn-outline-danger fw-semibold d-inline-flex align-items-center gap-1 px-3 py-1.5 rounded-3"
-                          onClick={() => {
-                            setDeleteItem(item);
-                            setShowDeleteModal(true);
-                          }}
-                        >
-                          <FiTrash2 /> Xóa
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </Table>
         ) : (
           <div className="p-4 bg-light">
-            <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            <Row xs={1} sm={2} md={3} lg={4} className="g-4">
               {filteredProducts.map((product) => (
-                <div className="col" key={product.id}>
-                  <div className="card h-100 border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                <Col key={product.id}>
+                  <Card className="h-100 border-0 shadow-sm rounded-4 overflow-hidden bg-white">
                     <div className="position-relative bg-light text-center p-3">
-                      <span className="badge bg-success bg-opacity-10 text-success fw-bold position-absolute top-0 start-0 m-3 px-2.5 py-1.5 rounded-pill">
+                      <Badge bg="success" className="bg-opacity-10 text-success fw-bold position-absolute top-0 start-0 m-3 px-2.5 py-1.5 rounded-pill">
                         {getCategoryName(product.categoryId)}
-                      </span>
-                      <img
+                      </Badge>
+                      <Card.Img
+                        variant="top"
                         src={product.image}
-                        alt={product.name}
-                        className="img-fluid rounded-3 object-fit-cover"
-                        style={{ height: 140, width: "100%", objectFit: "cover" }}
+                        className="rounded-3 object-fit-cover"
+                        style={{ height: 140, objectFit: "cover" }}
                         onError={(e) => {
-                          e.target.src =
-                            "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=60";
+                          e.target.src = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=60";
                         }}
                       />
                     </div>
-
-                    <div className="card-body p-3 d-flex flex-column">
+                    <Card.Body className="p-3 d-flex flex-column">
                       <h6 className="fw-bold text-dark mb-1 text-truncate">{product.name}</h6>
-                      <span className="fs-5 fw-extrabold text-success mb-2">
-                        {product.price.toLocaleString("vi-VN")} đ
-                      </span>
+                      <span className="fs-5 fw-extrabold text-success mb-2">{product.price.toLocaleString("vi-VN")} đ</span>
 
                       <div className="d-flex align-items-center justify-content-between mb-3 small">
                         <span className="text-muted">Tồn kho:</span>
                         {product.stock < 15 ? (
-                          <span className="badge bg-danger text-white rounded-pill">
-                            Sắp hết ({product.stock})
-                          </span>
+                          <Badge bg="danger" className="rounded-pill">Sắp hết ({product.stock})</Badge>
                         ) : (
                           <strong className="text-dark">{product.stock || 100} món</strong>
                         )}
                       </div>
 
                       <div className="d-flex gap-2 mt-auto">
-                        <button
-                          className="btn btn-outline-success btn-sm flex-grow-1 fw-bold rounded-3 py-2 d-flex align-items-center justify-content-center gap-1"
-                          onClick={() => handleOpenEdit(product)}
-                        >
+                        <Button variant="outline-success" size="sm" className="flex-grow-1 fw-bold rounded-3 py-2 d-flex align-items-center justify-content-center gap-1" onClick={() => handleOpenEdit(product)}>
                           <FiEdit2 size={14} /> Sửa
-                        </button>
-                        <button
-                          className="btn btn-outline-danger btn-sm flex-grow-1 fw-bold rounded-3 py-2 d-flex align-items-center justify-content-center gap-1"
-                          onClick={() => {
-                            setDeleteItem(product);
-                            setShowDeleteModal(true);
-                          }}
-                        >
+                        </Button>
+                        <Button variant="outline-danger" size="sm" className="flex-grow-1 fw-bold rounded-3 py-2 d-flex align-items-center justify-content-center gap-1" onClick={() => { setDeleteItem(product); setShowDeleteModal(true); }}>
                           <FiTrash2 size={14} /> Xóa
-                        </button>
+                        </Button>
                       </div>
-                    </div>
-                  </div>
-                </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
               ))}
-            </div>
+            </Row>
           </div>
         )}
-      </div>
+      </Card>
 
-      {/* CREATE / EDIT MODAL */}
-      {showModal && (
-        <div
-          className="modal fade show d-block"
-          tabIndex="-1"
-          style={{ background: "rgba(15,23,42,0.6)", backdropFilter: "blur(4px)" }}
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content rounded-4 border-0 shadow-lg p-3">
-              <div className="modal-header border-bottom-0 pb-0">
-                <h5 className="modal-title fw-extrabold text-dark">
-                  {isEditing ? "✏️ Chỉnh Sửa Sản Phẩm (PUT)" : "➕ Thêm Sản Phẩm Mới (POST)"}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowModal(false)}
-                ></button>
-              </div>
+      {/* CREATE / EDIT REACT-BOOTSTRAP MODAL */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton className="border-bottom-0 pb-0">
+          <Modal.Title className="fw-extrabold text-dark fs-5">
+            {isEditing ? "✏️ Chỉnh Sửa Sản Phẩm (PUT)" : "➕ Thêm Sản Phẩm Mới (POST)"}
+          </Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handleSubmitForm}>
+          <Modal.Body className="py-3">
+            <Form.Group className="mb-3" controlId="prodName">
+              <Form.Label className="fw-bold text-secondary small">Tên sản phẩm *</Form.Label>
+              <Form.Control
+                type="text"
+                ref={nameInputRef}
+                placeholder="Nhập tên sản phẩm..."
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
+            </Form.Group>
 
-              <form onSubmit={handleSubmitForm}>
-                <div className="modal-body py-3">
-                  <div className="mb-3">
-                    <label className="form-label fw-bold text-secondary small">Tên sản phẩm *</label>
-                    <input
-                      type="text"
-                      ref={nameInputRef}
-                      className="form-control rounded-3"
-                      placeholder="Nhập tên sản phẩm..."
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      required
-                    />
-                  </div>
+            <Row className="g-3 mb-3">
+              <Col col={6}>
+                <Form.Group controlId="prodPrice">
+                  <Form.Label className="fw-bold text-secondary small">Giá bán (VND) *</Form.Label>
+                  <Form.Control
+                    type="number"
+                    placeholder="Ví dụ: 50000"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    required
+                  />
+                </Form.Group>
+              </Col>
+              <Col col={6}>
+                <Form.Group controlId="prodStock">
+                  <Form.Label className="fw-bold text-secondary small">Số lượng tồn kho</Form.Label>
+                  <Form.Control
+                    type="number"
+                    value={formData.stock}
+                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
 
-                  <div className="row g-3 mb-3">
-                    <div className="col-6">
-                      <label className="form-label fw-bold text-secondary small">Giá bán (VND) *</label>
-                      <input
-                        type="number"
-                        className="form-control rounded-3"
-                        placeholder="Ví dụ: 50000"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="col-6">
-                      <label className="form-label fw-bold text-secondary small">Số lượng tồn kho</label>
-                      <input
-                        type="number"
-                        className="form-control rounded-3"
-                        value={formData.stock}
-                        onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                      />
-                    </div>
-                  </div>
+            <Form.Group className="mb-3" controlId="prodCat">
+              <Form.Label className="fw-bold text-secondary small">Danh mục sản phẩm *</Form.Label>
+              <Form.Select
+                value={formData.categoryId}
+                onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+              >
+                <option value="1">🍎 Hoa quả tươi</option>
+                <option value="2">🥤 Thức uống</option>
+                <option value="3">🥖 Đồ ăn & Thực phẩm</option>
+              </Form.Select>
+            </Form.Group>
 
-                  <div className="mb-3">
-                    <label className="form-label fw-bold text-secondary small">Danh mục *</label>
-                    <select
-                      className="form-select rounded-3"
-                      value={formData.categoryId}
-                      onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                    >
-                      <option value="1">🍎 Hoa quả tươi</option>
-                      <option value="2">🥤 Thức uống</option>
-                      <option value="3">🥖 Đồ ăn & Thực phẩm</option>
-                    </select>
-                  </div>
+            <Form.Group className="mb-3" controlId="prodImg">
+              <Form.Label className="fw-bold text-secondary small">Link hình ảnh (URL)</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="/images/apple.jpg"
+                value={formData.image}
+                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+              />
+            </Form.Group>
 
-                  <div className="mb-3">
-                    <label className="form-label fw-bold text-secondary small">Link hình ảnh (URL)</label>
-                    <input
-                      type="text"
-                      className="form-control rounded-3"
-                      placeholder="/images/apple.jpg"
-                      value={formData.image}
-                      onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    />
-                  </div>
+            <Form.Group controlId="prodDesc">
+              <Form.Label className="fw-bold text-secondary small">Mô tả ngắn</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={2}
+                placeholder="Mô tả chất lượng..."
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer className="border-top-0 pt-0">
+            <Button variant="light" className="fw-bold px-4" onClick={() => setShowModal(false)}>
+              Hủy
+            </Button>
+            <Button variant="success" type="submit" className="fw-bold px-4 shadow-sm">
+              {isEditing ? "Lưu Cập Nhật" : "Thêm Ngay"}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
 
-                  <div className="mb-2">
-                    <label className="form-label fw-bold text-secondary small">Mô tả sản phẩm</label>
-                    <textarea
-                      className="form-control rounded-3"
-                      rows="2"
-                      placeholder="Mô tả chất lượng, xuất xứ sản phẩm..."
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    ></textarea>
-                  </div>
-                </div>
-
-                <div className="modal-footer border-top-0 pt-0">
-                  <button
-                    type="button"
-                    className="btn btn-light fw-bold rounded-3 px-4"
-                    onClick={() => setShowModal(false)}
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn btn-success fw-bold rounded-3 px-4 shadow-sm"
-                  >
-                    {isEditing ? "Lưu Cập Nhật" : "Thêm Ngay"}
-                  </button>
-                </div>
-              </form>
-            </div>
+      {/* DELETE CONFIRMATION REACT-BOOTSTRAP MODAL */}
+      <Modal show={showDeleteModal && !!deleteItem} onHide={() => setShowDeleteModal(false)} centered size="sm">
+        <Modal.Body className="text-center p-4">
+          <FiTrash2 size={44} className="text-danger mb-3" />
+          <h5 className="fw-bold text-dark mb-2">Xác Nhận Xóa</h5>
+          <p className="text-muted small mb-4">
+            Bạn có chắc chắn muốn xóa sản phẩm <strong>"{deleteItem?.name}"</strong> không?
+          </p>
+          <div className="d-flex gap-2">
+            <Button variant="light" className="flex-grow-1 fw-bold" onClick={() => setShowDeleteModal(false)}>
+              Hủy
+            </Button>
+            <Button variant="danger" className="flex-grow-1 fw-bold" onClick={handleConfirmDelete}>
+              Xóa Ngay
+            </Button>
           </div>
-        </div>
-      )}
-
-      {/* DELETE CONFIRMATION MODAL */}
-      {showDeleteModal && deleteItem && (
-        <div
-          className="modal fade show d-block"
-          tabIndex="-1"
-          style={{ background: "rgba(15,23,42,0.6)", backdropFilter: "blur(4px)" }}
-        >
-          <div className="modal-dialog modal-dialog-centered modal-sm">
-            <div className="modal-content rounded-4 border-0 shadow-lg text-center p-3">
-              <div className="modal-body">
-                <FiTrash2 size={40} className="text-danger mb-3" />
-                <h5 className="fw-bold text-dark mb-2">Xác Nhận Xóa</h5>
-                <p className="text-muted small">
-                  Bạn có chắc chắn muốn xóa sản phẩm <strong>"{deleteItem.name}"</strong> không?
-                </p>
-              </div>
-              <div className="d-flex gap-2">
-                <button
-                  className="btn btn-light flex-grow-1 fw-bold rounded-3"
-                  onClick={() => setShowDeleteModal(false)}
-                >
-                  Hủy
-                </button>
-                <button
-                  className="btn btn-danger flex-grow-1 fw-bold rounded-3"
-                  onClick={handleConfirmDelete}
-                >
-                  Xóa Ngay
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+        </Modal.Body>
+      </Modal>
+    </Container>
   );
 };
 

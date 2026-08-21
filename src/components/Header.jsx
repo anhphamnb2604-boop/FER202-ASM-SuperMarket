@@ -1,4 +1,5 @@
 import React from "react";
+import { Navbar, Nav, Container, Button, Badge } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import {
   FiShoppingBag,
@@ -20,10 +21,10 @@ const Header = ({ cartCount = 0, currentUser = null, onLogout = () => { } }) => 
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-success shadow-sm sticky-top py-2">
-      <div className="container">
+    <Navbar bg="success" variant="dark" expand="lg" sticky="top" className="shadow-sm py-2">
+      <Container>
         {/* Brand Logo */}
-        <Link to="/" className="navbar-brand d-flex align-items-center gap-2 fw-bold text-white fs-4 me-4">
+        <Navbar.Brand as={Link} to="/" className="d-flex align-items-center gap-2 fw-bold fs-4 me-4">
           <div className="bg-white text-success rounded-circle d-flex align-items-center justify-content-center" style={{ width: 38, height: 38 }}>
             <FiShoppingBag size={20} />
           </div>
@@ -31,102 +32,107 @@ const Header = ({ cartCount = 0, currentUser = null, onLogout = () => { } }) => 
             <div className="lh-1">The Anh</div>
             <small className="text-white-50 fs-6 fw-normal">SuperMarket</small>
           </div>
-        </Link>
+        </Navbar.Brand>
 
-        {/* Navigation Links */}
-        <div className="collapse navbar-collapse show" id="navbarNav">
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-1 fw-semibold">
-            <li className="nav-item">
-              <Link
-                to="/"
-                className={`nav-link px-3 rounded-3 d-flex align-items-center gap-2 ${isActive("/") ? "active bg-white text-success fw-bold" : "text-white"}`}
-              >
-                <FiHome /> Trang Chủ
-              </Link>
-            </li>
+        <Navbar.Toggle aria-controls="main-navbar-nav" />
+        <Navbar.Collapse id="main-navbar-nav">
+          <Nav className="me-auto gap-1 fw-semibold">
+            <Nav.Link
+              as={Link}
+              to="/"
+              active={isActive("/")}
+              className={`px-3 rounded-3 d-flex align-items-center gap-2 ${isActive("/") ? "bg-white text-success fw-bold" : "text-white"}`}
+            >
+              <FiHome /> Trang Chủ
+            </Nav.Link>
 
-            <li className="nav-item">
-              <Link
-                to="/about"
-                className={`nav-link px-3 rounded-3 d-flex align-items-center gap-2 ${isActive("/about") ? "active bg-white text-success fw-bold" : "text-white"}`}
-              >
-                <FiInfo /> Giới Thiệu
-              </Link>
-            </li>
+            <Nav.Link
+              as={Link}
+              to="/about"
+              active={isActive("/about")}
+              className={`px-3 rounded-3 d-flex align-items-center gap-2 ${isActive("/about") ? "bg-white text-success fw-bold" : "text-white"}`}
+            >
+              <FiInfo /> Giới Thiệu
+            </Nav.Link>
 
-            <li className="nav-item">
-              <Link
-                to="/cart"
-                className={`nav-link px-3 rounded-3 d-flex align-items-center gap-2 ${isActive("/cart") ? "active bg-white text-success fw-bold" : "text-white"}`}
-              >
-                <FiShoppingCart /> Giỏ Hàng
-              </Link>
-            </li>
+            <Nav.Link
+              as={Link}
+              to="/cart"
+              active={isActive("/cart")}
+              className={`px-3 rounded-3 d-flex align-items-center gap-2 ${isActive("/cart") ? "bg-white text-success fw-bold" : "text-white"}`}
+            >
+              <FiShoppingCart /> Giỏ Hàng
+            </Nav.Link>
 
-            <li className="nav-item">
-              <Link
-                to="/checkout"
-                className={`nav-link px-3 rounded-3 d-flex align-items-center gap-2 ${isActive("/checkout") ? "active bg-white text-success fw-bold" : "text-white"}`}
-              >
-                <FiCreditCard /> Thanh Toán
-              </Link>
-            </li>
+            <Nav.Link
+              as={Link}
+              to="/checkout"
+              active={isActive("/checkout")}
+              className={`px-3 rounded-3 d-flex align-items-center gap-2 ${isActive("/checkout") ? "bg-white text-success fw-bold" : "text-white"}`}
+            >
+              <FiCreditCard /> Thanh Toán
+            </Nav.Link>
 
             {(currentUser?.role === "admin" || currentUser?.email?.toLowerCase().includes("admin")) && (
-              <li className="nav-item">
-                <Link
-                  to="/admin"
-                  className={`nav-link px-3 rounded-3 d-flex align-items-center gap-2 ${isActive("/admin") ? "active bg-warning text-dark fw-bold" : "text-warning fw-bold"}`}
-                >
-                  <FiShield /> Quản Lý (Admin)
-                </Link>
-              </li>
+              <Nav.Link
+                as={Link}
+                to="/admin"
+                active={isActive("/admin")}
+                className={`px-3 rounded-3 d-flex align-items-center gap-2 ${isActive("/admin") ? "bg-warning text-dark fw-bold" : "text-warning fw-bold"}`}
+              >
+                <FiShield /> Quản Lý (Admin)
+              </Nav.Link>
             )}
-          </ul>
+          </Nav>
 
           {/* Right Action Buttons */}
-          <div className="d-flex align-items-center gap-2">
-            <Link
+          <div className="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+            <Button
+              as={Link}
               to="/cart"
-              className={`btn ${isActive("/cart") ? "btn-light text-success fw-bold" : "btn-outline-light"} position-relative d-flex align-items-center gap-2 rounded-pill px-3 py-2`}
+              variant={isActive("/cart") ? "light" : "outline-light"}
+              className={`position-relative d-flex align-items-center gap-2 rounded-pill px-3 py-2 ${isActive("/cart") ? "text-success fw-bold" : ""}`}
             >
               <FiShoppingCart size={18} />
               <span>Giỏ Hàng</span>
               {cartCount > 0 && (
-                <span className="badge bg-danger rounded-pill ms-1 fs-7">
+                <Badge bg="danger" pill className="ms-1 fs-7">
                   {cartCount}
-                </span>
+                </Badge>
               )}
-            </Link>
+            </Button>
 
             {currentUser ? (
               <div className="d-flex align-items-center gap-2">
-                <span className="btn btn-light text-success fw-bold d-flex align-items-center gap-2 rounded-pill px-3 py-2 shadow-sm cursor-default">
+                <Button variant="light" className="text-success fw-bold d-flex align-items-center gap-2 rounded-pill px-3 py-2 shadow-sm cursor-default">
                   <FiUser size={18} />
                   <span>{currentUser.name}</span>
-                </span>
-                <button
-                  className="btn btn-outline-light rounded-circle p-2 d-flex align-items-center justify-content-center"
+                </Button>
+                <Button
+                  variant="outline-light"
+                  className="rounded-circle p-2 d-flex align-items-center justify-content-center"
                   title="Đăng xuất"
                   onClick={onLogout}
                   style={{ width: 38, height: 38 }}
                 >
                   <FiLogOut size={16} />
-                </button>
+                </Button>
               </div>
             ) : (
-              <Link
+              <Button
+                as={Link}
                 to="/login"
-                className={`btn ${isActive("/login") ? "btn-light text-success fw-bold" : "btn-outline-light"} d-flex align-items-center gap-2 rounded-pill px-3 py-2 shadow-sm`}
+                variant={isActive("/login") ? "light" : "outline-light"}
+                className={`d-flex align-items-center gap-2 rounded-pill px-3 py-2 shadow-sm ${isActive("/login") ? "text-success fw-bold" : ""}`}
               >
                 <FiUser size={18} />
                 <span>Đăng Nhập</span>
-              </Link>
+              </Button>
             )}
           </div>
-        </div>
-      </div>
-    </nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
   );
 };
 

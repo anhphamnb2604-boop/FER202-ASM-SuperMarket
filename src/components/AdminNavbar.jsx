@@ -1,12 +1,12 @@
 import React from "react";
+import { Navbar, Nav, Container, Button, Badge } from "react-bootstrap";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FiBox,
   FiFileText,
   FiPieChart,
   FiLogOut,
-  FiShield,
-  FiShoppingBag
+  FiShield
 } from "react-icons/fi";
 
 const AdminNavbar = ({ onLogout }) => {
@@ -31,74 +31,72 @@ const AdminNavbar = ({ onLogout }) => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-success shadow-sm sticky-top py-2.5 mb-4">
-      <div className="container">
-        {/* Brand Logo for Admin */}
-        <Link to="/admin" className="navbar-brand d-flex align-items-center gap-2 fw-bold text-white fs-5 me-4">
-          <div className="bg-white text-success rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: 38, height: 38 }}>
+    <Navbar bg="success" variant="dark" expand="lg" sticky="top" className="shadow-sm py-2 mb-4">
+      <Container>
+        <Navbar.Brand as={Link} to="/admin" className="d-flex align-items-center gap-2 fw-bold fs-5 me-4">
+          <div className="bg-white text-success rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{ width: 36, height: 36 }}>
             <FiShield size={20} />
           </div>
           <div>
             <div className="lh-1 fw-extrabold">Admin Portal</div>
             <small className="text-white-50 fs-7 fw-normal">SuperMarket 1990s</small>
           </div>
-        </Link>
+        </Navbar.Brand>
 
-        {/* Admin Navigation Links */}
-        <div className="collapse navbar-collapse show" id="adminNavbarNav">
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0 gap-1 fw-semibold fs-6">
-            <li className="nav-item">
-              <Link
-                to="/admin"
-                className={`nav-link px-3 rounded-3 d-flex align-items-center gap-2 ${
-                  isActive("/admin") ? "active bg-white text-success fw-bold" : "text-white"
-                }`}
-              >
-                <FiBox /> Quản Lý Sản Phẩm
-              </Link>
-            </li>
+        <Navbar.Toggle aria-controls="admin-navbar-nav" />
+        <Navbar.Collapse id="admin-navbar-nav">
+          <Nav className="me-auto gap-1 fw-semibold fs-6">
+            <Nav.Link
+              as={Link}
+              to="/admin"
+              active={isActive("/admin")}
+              className={`px-3 rounded-3 d-flex align-items-center gap-2 ${
+                isActive("/admin") ? "bg-white text-success fw-bold" : "text-white"
+              }`}
+            >
+              <FiBox /> Quản Lý Sản Phẩm
+            </Nav.Link>
 
-            <li className="nav-item">
-              <Link
-                to="/admin/orders"
-                className={`nav-link px-3 rounded-3 d-flex align-items-center gap-2 ${
-                  isActive("/admin/orders") ? "active bg-white text-success fw-bold" : "text-white"
-                }`}
-              >
-                <FiFileText /> Quản Lý Đơn Hàng
-              </Link>
-            </li>
+            <Nav.Link
+              as={Link}
+              to="/admin/orders"
+              active={isActive("/admin/orders")}
+              className={`px-3 rounded-3 d-flex align-items-center gap-2 ${
+                isActive("/admin/orders") ? "bg-white text-success fw-bold" : "text-white"
+              }`}
+            >
+              <FiFileText /> Quản Lý Đơn Hàng
+            </Nav.Link>
 
-            <li className="nav-item">
-              <Link
-                to="/admin/reports"
-                className={`nav-link px-3 rounded-3 d-flex align-items-center gap-2 ${
-                  isActive("/admin/reports") ? "active bg-white text-success fw-bold" : "text-white"
-                }`}
-              >
-                <FiPieChart /> Báo Cáo & Thống Kê
-              </Link>
-            </li>
-          </ul>
+            <Nav.Link
+              as={Link}
+              to="/admin/reports"
+              active={isActive("/admin/reports")}
+              className={`px-3 rounded-3 d-flex align-items-center gap-2 ${
+                isActive("/admin/reports") ? "bg-white text-success fw-bold" : "text-white"
+              }`}
+            >
+              <FiPieChart /> Báo Cáo & Thống Kê
+            </Nav.Link>
+          </Nav>
 
-          {/* Right Admin Controls */}
-          <div className="d-flex align-items-center gap-2">
-            <span className="btn btn-light text-success fw-bold d-flex align-items-center gap-2 rounded-pill px-3 py-1.5 shadow-sm fs-7 cursor-default">
-              <FiShield size={16} />
-              <span>Admin</span>
-            </span>
+          <div className="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+            <Badge bg="light" text="success" className="p-2 fs-7 rounded-pill shadow-sm">
+              <FiShield size={14} className="me-1" /> Admin
+            </Badge>
 
-            <button
-              className="btn btn-danger fw-bold rounded-pill px-3 py-1.5 d-flex align-items-center gap-1.5 shadow-sm fs-7"
+            <Button
+              variant="danger"
+              size="sm"
+              className="fw-bold rounded-pill px-3 py-1.5 shadow-sm d-flex align-items-center gap-1"
               onClick={handleLogout}
-              title="Đăng xuất khỏi hệ thống"
             >
               <FiLogOut size={16} /> Đăng Xuất
-            </button>
+            </Button>
           </div>
-        </div>
-      </div>
-    </nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
   );
 };
 
