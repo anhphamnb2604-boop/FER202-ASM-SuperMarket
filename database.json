@@ -135,24 +135,7 @@
     {
       "id": "1",
       "userId": 1,
-      "items": [
-        {
-          "productId": "1",
-          "quantity": 1
-        },
-        {
-          "productId": "2",
-          "quantity": 1
-        },
-        {
-          "productId": "3",
-          "quantity": 1
-        },
-        {
-          "productId": "4",
-          "quantity": 1
-        }
-      ]
+      "items": []
     }
   ],
   "orders": [
@@ -204,6 +187,70 @@
           "productName": "Táo Fuji",
           "quantity": 1,
           "price": 45000
+        }
+      ]
+    },
+    {
+      "id": "9676",
+      "userId": 1,
+      "totalAmount": 155000,
+      "status": "completed",
+      "createdAt": "2026-08-21",
+      "shippingAddress": "123 Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+      "recipientName": "Nguyễn Văn A",
+      "phone": "0912345678",
+      "paymentMethod": "cod",
+      "orderRef": "ORD-875893",
+      "items": [
+        {
+          "productId": "1",
+          "productName": "Táo Fuji",
+          "quantity": 1,
+          "price": 45000
+        },
+        {
+          "productId": "2",
+          "productName": "Chuối Cavendish",
+          "quantity": 1,
+          "price": 30000
+        },
+        {
+          "productId": "3",
+          "productName": "Cam Sành",
+          "quantity": 1,
+          "price": 40000
+        },
+        {
+          "productId": "4",
+          "productName": "Coca Cola 330ml",
+          "quantity": 1,
+          "price": 10000
+        }
+      ]
+    },
+    {
+      "id": "25d7",
+      "userId": 1,
+      "totalAmount": 105000,
+      "status": "completed",
+      "createdAt": "2026-08-21",
+      "shippingAddress": "123 Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+      "recipientName": "Nguyễn Văn A",
+      "phone": "0912345678",
+      "paymentMethod": "cod",
+      "orderRef": "ORD-422736",
+      "items": [
+        {
+          "productId": "1",
+          "productName": "Táo Fuji",
+          "quantity": 1,
+          "price": 45000
+        },
+        {
+          "productId": "2",
+          "productName": "Chuối Cavendish",
+          "quantity": 1,
+          "price": 30000
         }
       ]
     }

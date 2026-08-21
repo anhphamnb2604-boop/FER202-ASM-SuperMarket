@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FiFileText, FiCheckCircle, FiShoppingBag } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { apiGetOrders } from "../services/api";
+import { apiGetOrders } from "../../services/api";
 
 const BillPage = () => {
   const [orders, setOrders] = useState([]);
@@ -127,4 +127,3 @@ const BillPage = () => {
 };
 
 export default BillPage;
-

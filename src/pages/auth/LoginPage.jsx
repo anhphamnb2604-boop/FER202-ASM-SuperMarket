@@ -11,7 +11,7 @@ import {
   FiZap,
   FiUserCheck
 } from 'react-icons/fi';
-import { loginAPI } from '../services/api';
+import { loginAPI } from '../../services/api';
 
 function LoginPage({ onLoginSuccess = () => {} }) {
   const [email, setEmail] = useState('');

@@ -2,15 +2,22 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import Header from "./components/Header";
 import AdminNavbar from "./components/AdminNavbar";
-import HomePage from "./pages/HomePage";
-import CartScreen from "./pages/CartScreen";
-import CheckoutPage from "./pages/CheckoutPage";
-import AboutPage from "./pages/AboutPage";
-import LoginPage from "./pages/LoginPage";
-import BillPage from "./pages/BillPage";
+
+// Auth Page
+import LoginPage from "./pages/auth/LoginPage";
+
+// Customer Pages
+import HomePage from "./pages/customer/HomePage";
+import CartScreen from "./pages/customer/CartScreen";
+import CheckoutPage from "./pages/customer/CheckoutPage";
+import AboutPage from "./pages/customer/AboutPage";
+import BillPage from "./pages/customer/BillPage";
+
+// Admin Pages
 import AdminProductsPage from "./pages/admin/AdminProductsPage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
 import AdminReportsPage from "./pages/admin/AdminReportsPage";
+
 import { apiGetCart } from "./services/api";
 
 function AppContent() {
@@ -80,13 +87,13 @@ function AppContent() {
 
       <main className="min-vh-100 bg-light pb-5">
         <Routes>
-          {/* 1. Trang Đăng Nhập */}
+          {/* 1. Trang Đăng Nhập (Auth) */}
           <Route
             path="/login"
             element={<LoginPage onLoginSuccess={(user) => setCurrentUser(user)} />}
           />
 
-          {/* 2. Trang Chủ Khách Hàng */}
+          {/* 2. Các Trang Khách Hàng (Customer) */}
           <Route
             path="/"
             element={<HomePage onCartChange={updateCartCount} />}
@@ -95,26 +102,18 @@ function AppContent() {
             path="/home"
             element={<HomePage onCartChange={updateCartCount} />}
           />
-
-          {/* 3. Trang Giỏ Hàng */}
           <Route
             path="/cart"
             element={<CartScreen onCartChange={updateCartCount} />}
           />
-
-          {/* 4. Trang Thanh Toán */}
           <Route
             path="/checkout"
             element={<CheckoutPage onCartChange={updateCartCount} />}
           />
-
-          {/* 5. Trang Giới Thiệu */}
           <Route path="/about" element={<AboutPage />} />
-
-          {/* 6. Trang Hóa Đơn */}
           <Route path="/bill" element={<BillPage />} />
 
-          {/* 7. Các Trang Admin Riêng Biệt */}
+          {/* 3. Các Trang Quản Trị (Admin) */}
           <Route path="/admin" element={<AdminProductsPage />} />
           <Route path="/admin/products" element={<AdminProductsPage />} />
           <Route path="/admin/orders" element={<AdminOrdersPage />} />

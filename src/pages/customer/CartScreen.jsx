@@ -9,7 +9,7 @@ import {
   FiTruck,
   FiTag
 } from "react-icons/fi";
-import { apiGetCart, apiGetProducts, apiUpdateCart } from "../services/api";
+import { apiGetCart, apiGetProducts, apiUpdateCart } from "../../services/api";
 
 const CartScreen = ({ onCartChange = () => {} }) => {
   const [cart, setCart] = useState(null);

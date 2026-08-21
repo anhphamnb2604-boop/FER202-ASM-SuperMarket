@@ -7,7 +7,7 @@ import {
   FiTruck,
   FiArrowLeft
 } from "react-icons/fi";
-import { apiCreateOrder, apiUpdateCart } from "../services/api";
+import { apiCreateOrder, apiUpdateCart } from "../../services/api";
 
 const CheckoutPage = ({ onCartChange = () => {} }) => {
   const location = useLocation();
