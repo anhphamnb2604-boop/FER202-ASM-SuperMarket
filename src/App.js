@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import Header from "./components/Header";
 import HomePage from "./pages/HomePage";
 import CartScreen from "./pages/CartScreen";
@@ -14,6 +14,7 @@ function AppContent() {
   const [cartCount, setCartCount] = useState(0);
   const [currentUser, setCurrentUser] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const userId = 1;
   const isLoginPage = location.pathname === "/login";
@@ -52,6 +53,7 @@ function AppContent() {
     localStorage.removeItem("fer_current_user");
     localStorage.removeItem("user");
     setCurrentUser(null);
+    navigate("/login");
   };
 
   return (
