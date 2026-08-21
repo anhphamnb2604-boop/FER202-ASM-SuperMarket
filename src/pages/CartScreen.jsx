@@ -20,6 +20,8 @@ const CartScreen = ({ onCartChange = () => {} }) => {
   const [discountPercent, setDiscountPercent] = useState(0);
   const [couponMessage, setCouponMessage] = useState("");
 
+  const [showCheckoutConfirmModal, setShowCheckoutConfirmModal] = useState(false);
+
   const navigate = useNavigate();
   const userId = 1;
 
@@ -153,6 +155,84 @@ const CartScreen = ({ onCartChange = () => {} }) => {
                   onClick={confirmDelete}
                 >
                   Xóa ngay
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Confirmation Modal */}
+      {showCheckoutConfirmModal && (
+        <div
+          className="modal fade show d-block"
+          tabIndex="-1"
+          style={{ background: "rgba(15,23,42,0.6)", backdropFilter: "blur(4px)" }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content rounded-4 border-0 shadow-lg p-3">
+              <div className="modal-header border-0 pb-0">
+                <h5 className="modal-title fw-bold text-success d-flex align-items-center gap-2">
+                  <FiShoppingBag /> Xác Nhận Đơn Hàng & Thanh Toán
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowCheckoutConfirmModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body py-3">
+                <p className="text-secondary mb-3">
+                  Bạn có chắc chắn muốn tiến hành thanh toán đơn hàng này không?
+                </p>
+
+                <div className="bg-light p-3 rounded-3 mb-3 border">
+                  <div className="d-flex justify-content-between mb-2 small">
+                    <span className="text-muted">Số lượng sản phẩm:</span>
+                    <strong className="text-dark">{items.length} món</strong>
+                  </div>
+                  <div className="d-flex justify-content-between mb-2 small">
+                    <span className="text-muted">Tạm tính:</span>
+                    <strong className="text-dark">{currentSubtotal.toLocaleString("vi-VN")} đ</strong>
+                  </div>
+                  <div className="d-flex justify-content-between mb-2 small">
+                    <span className="text-muted">Phí vận chuyển:</span>
+                    <strong className={shippingFee === 0 ? "text-success" : "text-dark"}>
+                      {shippingFee === 0 ? "Miễn Phí" : `${shippingFee.toLocaleString("vi-VN")} đ`}
+                    </strong>
+                  </div>
+                  {discountAmount > 0 && (
+                    <div className="d-flex justify-content-between mb-2 small text-success">
+                      <span>Giảm giá ({discountPercent}%):</span>
+                      <strong>-{discountAmount.toLocaleString("vi-VN")} đ</strong>
+                    </div>
+                  )}
+                  <hr className="my-2" />
+                  <div className="d-flex justify-content-between align-items-center fs-6">
+                    <span className="fw-bold text-dark">Tổng tiền thanh toán:</span>
+                    <span className="fw-extrabold text-success fs-5">
+                      {finalTotal.toLocaleString("vi-VN")} đ
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer border-0 pt-0 gap-2">
+                <button
+                  type="button"
+                  className="btn btn-light fw-semibold rounded-pill px-4"
+                  onClick={() => setShowCheckoutConfirmModal(false)}
+                >
+                  Hủy / Quay lại
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-success fw-bold rounded-pill px-4 d-flex align-items-center gap-2 shadow-sm"
+                  onClick={() => {
+                    setShowCheckoutConfirmModal(false);
+                    navigate("/checkout", { state: { cart, products } });
+                  }}
+                >
+                  Tiến Hành Thanh Toán <FiArrowRight />
                 </button>
               </div>
             </div>
@@ -351,9 +431,7 @@ const CartScreen = ({ onCartChange = () => {} }) => {
 
               <button
                 className="btn btn-success w-100 py-3 fw-bold rounded-3 d-flex align-items-center justify-content-center gap-2 mb-2 shadow-sm fs-6"
-                onClick={() =>
-                  navigate("/checkout", { state: { cart, products } })
-                }
+                onClick={() => setShowCheckoutConfirmModal(true)}
               >
                 Tiến Hành Thanh Toán <FiArrowRight />
               </button>
