@@ -1,22 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import HomePage from "./pages/HomePage";
 import CartScreen from "./pages/CartScreen";
 import CheckoutPage from "./pages/CheckoutPage";
 import AboutPage from "./pages/AboutPage";
 import LoginPage from "./pages/LoginPage";
+import AdminPage from "./pages/AdminPage";
+import BillPage from "./pages/BillPage";
 import { apiGetCart } from "./services/api";
 
-function App() {
+function AppContent() {
   const [cartCount, setCartCount] = useState(0);
   const [currentUser, setCurrentUser] = useState(null);
+  const location = useLocation();
 
   const userId = 1;
+  const isLoginPage = location.pathname === "/login";
 
   useEffect(() => {
     // Check saved user session
-    const savedUser = localStorage.getItem("fer_current_user");
+    const savedUser = localStorage.getItem("fer_current_user") || localStorage.getItem("user");
     if (savedUser) {
       try {
         setCurrentUser(JSON.parse(savedUser));
@@ -46,16 +50,19 @@ function App() {
 
   const handleLogout = () => {
     localStorage.removeItem("fer_current_user");
+    localStorage.removeItem("user");
     setCurrentUser(null);
   };
 
   return (
-    <Router>
-      <Header
-        cartCount={cartCount}
-        currentUser={currentUser}
-        onLogout={handleLogout}
-      />
+    <>
+      {!isLoginPage && (
+        <Header
+          cartCount={cartCount}
+          currentUser={currentUser}
+          onLogout={handleLogout}
+        />
+      )}
 
       <main className="min-vh-100 bg-light pb-5">
         <Routes>
@@ -90,10 +97,24 @@ function App() {
           {/* 5. Trang Giới Thiệu */}
           <Route path="/about" element={<AboutPage />} />
 
+          {/* 6. Trang Admin */}
+          <Route path="/admin" element={<AdminPage />} />
+
+          {/* 7. Trang Hóa Đơn */}
+          <Route path="/bill" element={<BillPage />} />
+
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }

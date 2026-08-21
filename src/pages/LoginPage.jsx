@@ -58,10 +58,16 @@ function LoginPage({ onLoginSuccess = () => {} }) {
             />
           </Form.Group>
 
-          <Button variant="primary" type="submit" className="w-100">
+          <Button variant="primary" type="submit" className="w-100 mb-3">
             Login
           </Button>
         </Form>
+
+        <div className="bg-light p-2.5 rounded-3 text-center border mt-2">
+          <small className="text-muted d-block fw-bold mb-1">Tài khoản thử nghiệm:</small>
+          <small className="text-secondary d-block">Khách: user@gmail.com / 123456</small>
+          <small className="text-secondary d-block">Admin: admin@gmail.com / admin123</small>
+        </div>
       </Card>
     </Container>
   );
