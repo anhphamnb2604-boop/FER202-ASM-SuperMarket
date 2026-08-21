@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import Header from "./components/Header";
+import AdminNavbar from "./components/AdminNavbar";
 import HomePage from "./pages/HomePage";
 import CartScreen from "./pages/CartScreen";
 import CheckoutPage from "./pages/CheckoutPage";
 import AboutPage from "./pages/AboutPage";
 import LoginPage from "./pages/LoginPage";
-import AdminPage from "./pages/AdminPage";
 import BillPage from "./pages/BillPage";
+import AdminProductsPage from "./pages/admin/AdminProductsPage";
+import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
+import AdminReportsPage from "./pages/admin/AdminReportsPage";
 import { apiGetCart } from "./services/api";
 
 function AppContent() {
@@ -18,8 +21,9 @@ function AppContent() {
 
   const userId = 1;
   const isLoginPage = location.pathname === "/login";
-  const isAdminPage = location.pathname === "/admin";
-  const showNavbar = !isLoginPage && !isAdminPage;
+  const isAdminPage = location.pathname.startsWith("/admin");
+  const showCustomerNavbar = !isLoginPage && !isAdminPage;
+  const showAdminNavbar = isAdminPage;
 
   useEffect(() => {
     // Check saved user session
@@ -60,12 +64,18 @@ function AppContent() {
 
   return (
     <>
-      {showNavbar && (
+      {/* Customer Navbar */}
+      {showCustomerNavbar && (
         <Header
           cartCount={cartCount}
           currentUser={currentUser}
           onLogout={handleLogout}
         />
+      )}
+
+      {/* Admin Navbar */}
+      {showAdminNavbar && (
+        <AdminNavbar onLogout={handleLogout} />
       )}
 
       <main className="min-vh-100 bg-light pb-5">
@@ -76,7 +86,7 @@ function AppContent() {
             element={<LoginPage onLoginSuccess={(user) => setCurrentUser(user)} />}
           />
 
-          {/* 2. Trang Chủ */}
+          {/* 2. Trang Chủ Khách Hàng */}
           <Route
             path="/"
             element={<HomePage onCartChange={updateCartCount} />}
@@ -101,11 +111,14 @@ function AppContent() {
           {/* 5. Trang Giới Thiệu */}
           <Route path="/about" element={<AboutPage />} />
 
-          {/* 6. Trang Admin (Chuyên biệt cho Thêm, Sửa, Xóa) */}
-          <Route path="/admin" element={<AdminPage onLogout={handleLogout} />} />
-
-          {/* 7. Trang Hóa Đơn */}
+          {/* 6. Trang Hóa Đơn */}
           <Route path="/bill" element={<BillPage />} />
+
+          {/* 7. Các Trang Admin Riêng Biệt */}
+          <Route path="/admin" element={<AdminProductsPage />} />
+          <Route path="/admin/products" element={<AdminProductsPage />} />
+          <Route path="/admin/orders" element={<AdminOrdersPage />} />
+          <Route path="/admin/reports" element={<AdminReportsPage />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
