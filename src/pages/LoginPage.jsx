@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Card, Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { loginAPI } from './API';
+import { loginAPI } from '../services/api';
 
 function LoginPage({ onLoginSuccess = () => {} }) {
   const [email, setEmail] = useState('');
