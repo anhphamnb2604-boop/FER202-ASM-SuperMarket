@@ -7,7 +7,8 @@ import {
   FiShoppingCart,
   FiCreditCard,
   FiUser,
-  FiLogOut
+  FiLogOut,
+  FiShield
 } from "react-icons/fi";
 
 const Header = ({ cartCount = 0, currentUser = null, onLogout = () => { } }) => {
@@ -70,6 +71,17 @@ const Header = ({ cartCount = 0, currentUser = null, onLogout = () => { } }) => 
                 <FiCreditCard /> Thanh Toán
               </Link>
             </li>
+
+            {(currentUser?.role === "admin" || currentUser?.email?.toLowerCase().includes("admin")) && (
+              <li className="nav-item">
+                <Link
+                  to="/admin"
+                  className={`nav-link px-3 rounded-3 d-flex align-items-center gap-2 ${isActive("/admin") ? "active bg-warning text-dark fw-bold" : "text-warning fw-bold"}`}
+                >
+                  <FiShield /> Quản Lý (Admin)
+                </Link>
+              </li>
+            )}
           </ul>
 
           {/* Right Action Buttons */}

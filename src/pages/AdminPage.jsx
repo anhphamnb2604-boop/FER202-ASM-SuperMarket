@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FiPlus,
   FiEdit2,
@@ -7,7 +8,8 @@ import {
   FiBox,
   FiCheckCircle,
   FiXCircle,
-  FiRefreshCw
+  FiRefreshCw,
+  FiLogOut
 } from "react-icons/fi";
 import {
   apiGetProducts,
@@ -16,9 +18,20 @@ import {
   apiDeleteProduct
 } from "../services/api";
 
-const AdminPage = () => {
+const AdminPage = ({ onLogout }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const handleLogoutAdmin = () => {
+    if (onLogout) {
+      onLogout();
+    } else {
+      localStorage.removeItem("fer_current_user");
+      localStorage.removeItem("user");
+      navigate("/login");
+    }
+  };
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState("");
@@ -188,23 +201,40 @@ const AdminPage = () => {
         </div>
       )}
 
-      {/* Header Bar */}
-      <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-        <div>
-          <h2 className="fw-extrabold text-dark d-flex align-items-center gap-2 m-0">
-            <FiBox className="text-success" /> Quản Lý Sản Phẩm (Admin CRUD)
-          </h2>
-          <p className="text-muted small m-0 mt-1">
-            Quản lý dữ liệu sản phẩm (Thêm, Sửa, Xóa) kết nối trực tiếp json-server API
-          </p>
+      {/* Dedicated Admin Header Bar */}
+      <div
+        className="bg-success bg-gradient text-white p-3 px-4 rounded-4 shadow-sm mb-4 sticky-top d-flex align-items-center justify-content-between flex-wrap gap-3"
+        style={{ top: 12, zIndex: 1020 }}
+      >
+        <div className="d-flex align-items-center gap-3">
+          <div
+            className="bg-white text-success rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm"
+            style={{ width: 44, height: 44 }}
+          >
+            <FiBox size={24} />
+          </div>
+          <div>
+            <h4 className="fw-extrabold m-0 text-white">Quản Lý Sản Phẩm (Admin)</h4>
+            <small className="text-white-50">Thêm, sửa, xóa thông tin sản phẩm siêu thị</small>
+          </div>
         </div>
 
-        <button
-          className="btn btn-success fw-bold px-4 py-2.5 rounded-3 d-flex align-items-center gap-2 shadow-sm"
-          onClick={handleOpenCreateModal}
-        >
-          <FiPlus size={20} /> + Thêm Sản Phẩm Mới
-        </button>
+        <div className="d-flex align-items-center gap-2">
+          <button
+            className="btn btn-light text-success fw-bold px-3 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2"
+            onClick={handleOpenCreateModal}
+          >
+            <FiPlus size={18} /> Thêm Sản Phẩm Mới
+          </button>
+
+          <button
+            className="btn btn-danger fw-bold px-3 py-2 rounded-pill shadow-sm d-flex align-items-center gap-2"
+            title="Đăng xuất"
+            onClick={handleLogoutAdmin}
+          >
+            <FiLogOut size={18} /> Đăng Xuất
+          </button>
+        </div>
       </div>
 
       {/* Main Table Card Panel */}

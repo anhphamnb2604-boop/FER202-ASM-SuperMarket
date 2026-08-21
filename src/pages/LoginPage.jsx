@@ -41,7 +41,7 @@ function LoginPage({ onLoginSuccess = () => {} }) {
         if (onLoginSuccess) {
           onLoginSuccess(user);
         }
-        if (user.role === 'admin') {
+        if (user.role === 'admin' || user.email?.toLowerCase().includes('admin')) {
           navigate('/admin');
         } else {
           navigate('/');

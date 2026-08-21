@@ -18,6 +18,8 @@ function AppContent() {
 
   const userId = 1;
   const isLoginPage = location.pathname === "/login";
+  const isAdminPage = location.pathname === "/admin";
+  const showNavbar = !isLoginPage && !isAdminPage;
 
   useEffect(() => {
     // Check saved user session
@@ -58,7 +60,7 @@ function AppContent() {
 
   return (
     <>
-      {!isLoginPage && (
+      {showNavbar && (
         <Header
           cartCount={cartCount}
           currentUser={currentUser}
@@ -99,8 +101,8 @@ function AppContent() {
           {/* 5. Trang Giới Thiệu */}
           <Route path="/about" element={<AboutPage />} />
 
-          {/* 6. Trang Admin */}
-          <Route path="/admin" element={<AdminPage />} />
+          {/* 6. Trang Admin (Chuyên biệt cho Thêm, Sửa, Xóa) */}
+          <Route path="/admin" element={<AdminPage onLogout={handleLogout} />} />
 
           {/* 7. Trang Hóa Đơn */}
           <Route path="/bill" element={<BillPage />} />
