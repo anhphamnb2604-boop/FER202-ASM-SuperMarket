@@ -161,13 +161,28 @@ export const apiUpdateCart = async (cartId, cartData) => {
 /* ==========================================================================
    ORDERS API
    ========================================================================== */
-export const apiGetOrders = async (userId = 1) => {
+export const apiGetAllOrders = async () => {
   try {
-    const response = await api.get(`/orders?userId=${userId}`);
+    const response = await api.get("/orders");
     return response.data;
   } catch (error) {
     const db = getLocalDb();
-    return db.orders.filter((o) => Number(o.userId) === Number(userId));
+    return db.orders || [];
+  }
+};
+
+export const apiUpdateOrder = async (id, updatedData) => {
+  try {
+    const response = await api.put(`/orders/${id}`, updatedData);
+    return response.data;
+  } catch (error) {
+    const db = getLocalDb();
+    const idx = (db.orders || []).findIndex((o) => String(o.id) === String(id));
+    if (idx !== -1) {
+      db.orders[idx] = { ...db.orders[idx], ...updatedData };
+      saveLocalDb(db);
+    }
+    return updatedData;
   }
 };
 
