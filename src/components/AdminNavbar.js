@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FiBox,
   FiFileText,
+  FiUsers,
   FiPieChart,
   FiLogOut,
   FiShield
@@ -39,7 +40,7 @@ const AdminNavbar = ({ onLogout }) => {
           </div>
           <div>
             <div className="lh-1 fw-extrabold">Admin Portal</div>
-            <small className="text-white-50 fs-7 fw-normal">SuperMarket 1990s</small>
+            <small className="text-white-50 fs-7 fw-normal">SuperMarket FiveStar</small>
           </div>
         </Navbar.Brand>
 
@@ -55,6 +56,17 @@ const AdminNavbar = ({ onLogout }) => {
               }`}
             >
               <FiBox /> Quản Lý Sản Phẩm
+            </Nav.Link>
+
+            <Nav.Link
+              as={Link}
+              to="/admin/users"
+              active={isActive("/admin/users")}
+              className={`px-3 rounded-3 d-flex align-items-center gap-2 ${
+                isActive("/admin/users") ? "bg-white text-success fw-bold" : "text-white"
+              }`}
+            >
+              <FiUsers /> Quản Lý Người Dùng
             </Nav.Link>
 
             <Nav.Link

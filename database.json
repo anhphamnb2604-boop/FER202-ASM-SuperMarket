@@ -102,7 +102,7 @@
   "users": [
     {
       "id": "1",
-      "name": "Nguyễn Văn A",
+      "name": "Phạm Thế Anh",
       "email": "user@gmail.com",
       "password": "123456",
       "role": "customer"
@@ -113,12 +113,19 @@
       "email": "admin@gmail.com",
       "password": "admin123",
       "role": "admin"
+    },
+    {
+      "id": "1787384731761",
+      "name": "Phạm văn hải",
+      "email": "hai@gmail.com",
+      "password": "123",
+      "role": "customer"
     }
   ],
   "accounts": [
     {
       "id": "1",
-      "name": "Nguyễn Văn A",
+      "name": "Phạm Thế Anh",
       "email": "user@gmail.com",
       "password": "123456",
       "role": "customer"
@@ -135,7 +142,12 @@
     {
       "id": "1",
       "userId": 1,
-      "items": []
+      "items": [
+        {
+          "productId": "2",
+          "quantity": 2
+        }
+      ]
     }
   ],
   "orders": [
@@ -253,6 +265,37 @@
           "price": 30000
         }
       ]
+    },
+    {
+      "id": "1787336790065",
+      "orderCode": "ORD-559821",
+      "userId": "1",
+      "customerName": "Nguyễn Văn A",
+      "phone": "0987654321",
+      "address": "Số 12 Nguyễn Văn Cừ, Quận 5, TP. Hồ Chí Minh",
+      "note": "Giao hàng giờ hành chính giúp mình.",
+      "paymentMethod": "banking",
+      "items": [
+        {
+          "productId": "1",
+          "quantity": 1
+        },
+        {
+          "productId": "2",
+          "quantity": 1
+        },
+        {
+          "productId": "3",
+          "quantity": 1
+        },
+        {
+          "productId": "4",
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 155000,
+      "status": "pending",
+      "createdAt": "2026-08-21"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

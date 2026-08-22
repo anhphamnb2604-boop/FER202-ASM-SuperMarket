@@ -1,247 +1,131 @@
 import axios from "axios";
-import databaseJson from "../database.json";
 
-/**
- * FER Course Requirement: REST API Communication with json-server & ES6 CRUD
- * Target URL: http://localhost:9999
- */
-const API_URL = "http://localhost:9999";
-const STORAGE_KEY = "ferse1990_db";
-
-// Create Axios Instance with default settings
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json"
-  },
-  timeout: 1500
-});
-
-// LocalStorage Helper for offline fallback
-const getLocalDb = () => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch (e) {
-      console.error("Parse error local DB", e);
-    }
-  }
-  const defaultDb = {
-    categories: databaseJson.categories || [],
-    products: databaseJson.products || [],
-    users: databaseJson.users || [],
-    carts: databaseJson.carts || [{ id: "1", userId: 1, items: [{ productId: "2", quantity: 1 }, { productId: "3", quantity: 1 }] }],
-    orders: databaseJson.orders || []
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultDb));
-  return defaultDb;
-};
-
-const saveLocalDb = (data) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-};
+// Đường dẫn REST API mặc định từ json-server (cổng 9000)
+const API_URL = "http://localhost:9000";
 
 /* ==========================================================================
-   PRODUCTS CRUD OPERATIONS (Create, Read, Update, Delete) - ES6 & json-server
+   1. ĐĂNG NHẬP & ĐĂNG KÝ (AUTHENTICATION API)
    ========================================================================== */
-
-// 1. READ: Fetch all products
-export const apiGetProducts = async () => {
-  try {
-    const response = await api.get("/products");
-    return response.data;
-  } catch (error) {
-    console.warn("json-server offline, fallback to LocalStorage for GET /products");
-    const db = getLocalDb();
-    return db.products;
-  }
-};
-
-// 2. CREATE: Add new product (POST)
-export const apiCreateProduct = async (productData) => {
-  try {
-    const response = await api.post("/products", productData);
-    return response.data;
-  } catch (error) {
-    console.warn("json-server offline, fallback to LocalStorage for POST /products");
-    const db = getLocalDb();
-    const newProduct = {
-      ...productData,
-      id: String(Date.now())
-    };
-    db.products.unshift(newProduct);
-    saveLocalDb(db);
-    return newProduct;
-  }
-};
-
-// 3. UPDATE: Edit product details (PUT)
-export const apiUpdateProduct = async (id, updatedData) => {
-  try {
-    const response = await api.put(`/products/${id}`, updatedData);
-    return response.data;
-  } catch (error) {
-    console.warn("json-server offline, fallback to LocalStorage for PUT /products/:id");
-    const db = getLocalDb();
-    const index = db.products.findIndex((p) => String(p.id) === String(id));
-    if (index !== -1) {
-      db.products[index] = { ...db.products[index], ...updatedData };
-      saveLocalDb(db);
-    }
-    return updatedData;
-  }
-};
-
-// 4. DELETE: Remove product (DELETE)
-export const apiDeleteProduct = async (id) => {
-  try {
-    const response = await api.delete(`/products/${id}`);
-    return response.data;
-  } catch (error) {
-    console.warn("json-server offline, fallback to LocalStorage for DELETE /products/:id");
-    const db = getLocalDb();
-    db.products = db.products.filter((p) => String(p.id) !== String(id));
-    saveLocalDb(db);
-    return { success: true };
-  }
-};
-
-/* ==========================================================================
-   CATEGORIES API
-   ========================================================================== */
-export const apiGetCategories = async () => {
-  try {
-    const response = await api.get("/categories");
-    return response.data;
-  } catch (error) {
-    return getLocalDb().categories;
-  }
-};
-
-/* ==========================================================================
-   CARTS API
-   ========================================================================== */
-export const apiGetCart = async (userId = 1) => {
-  try {
-    const response = await api.get(`/carts?userId=${userId}`);
-    if (response.data && response.data.length > 0) {
-      return response.data;
-    }
-  } catch (error) {
-    // Fallback
-  }
-  const db = getLocalDb();
-  let cart = db.carts.find((c) => Number(c.userId) === Number(userId));
-  if (!cart) {
-    cart = { id: "1", userId: Number(userId), items: [] };
-    db.carts.push(cart);
-    saveLocalDb(db);
-  }
-  return [cart];
-};
-
-export const apiUpdateCart = async (cartId, cartData) => {
-  try {
-    const response = await api.put(`/carts/${cartId}`, cartData);
-    return response.data;
-  } catch (error) {
-    const db = getLocalDb();
-    const idx = db.carts.findIndex((c) => String(c.id) === String(cartId));
-    if (idx !== -1) {
-      db.carts[idx] = cartData;
-    } else {
-      db.carts.push(cartData);
-    }
-    saveLocalDb(db);
-    return cartData;
-  }
-};
-
-/* ==========================================================================
-   ORDERS API
-   ========================================================================== */
-export const apiGetAllOrders = async () => {
-  try {
-    const response = await api.get("/orders");
-    return response.data;
-  } catch (error) {
-    const db = getLocalDb();
-    return db.orders || [];
-  }
-};
-
-export const apiGetOrders = async (userId = 1) => {
-  try {
-    const response = await api.get(`/orders?userId=${userId}`);
-    if (response.data && response.data.length > 0) return response.data;
-  } catch (error) {
-    const db = getLocalDb();
-    if (db.orders) return db.orders.filter((o) => Number(o.userId) === Number(userId));
-  }
-  return apiGetAllOrders();
-};
-
-export const apiUpdateOrder = async (id, updatedData) => {
-  try {
-    const response = await api.put(`/orders/${id}`, updatedData);
-    return response.data;
-  } catch (error) {
-    const db = getLocalDb();
-    const idx = (db.orders || []).findIndex((o) => String(o.id) === String(id));
-    if (idx !== -1) {
-      db.orders[idx] = { ...db.orders[idx], ...updatedData };
-      saveLocalDb(db);
-    }
-    return updatedData;
-  }
-};
-
-export const apiCreateOrder = async (orderData) => {
-  try {
-    const response = await api.post("/orders", orderData);
-    return response.data;
-  } catch (error) {
-    const db = getLocalDb();
-    const newOrder = {
-      ...orderData,
-      id: String(Date.now()),
-      createdAt: new Date().toISOString().split("T")[0]
-    };
-    db.orders.unshift(newOrder);
-    saveLocalDb(db);
-    return newOrder;
-  }
-};
-
-/* ==========================================================================
-   LOGIN / USERS API
-   ========================================================================== */
+// Hàm đăng nhập: Tìm người dùng theo email và đối chiếu mật khẩu
 export const loginAPI = async (email, password) => {
-  try {
-    const resUsers = await api.get(`/users?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
-    if (resUsers.data && resUsers.data.length > 0) {
-      return resUsers.data;
-    }
-    const resAcc = await api.get(`/accounts?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
-    if (resAcc.data && resAcc.data.length > 0) {
-      return resAcc.data;
-    }
-  } catch (error) {
-    console.warn("json-server offline, checking LocalStorage / fallback");
-  }
-
-  const db = getLocalDb();
-  const matchedUser = (db.users || []).find(
-    (u) => u.email === email && u.password === password
-  );
-  if (matchedUser) return [matchedUser];
-
-  const matchedAcc = (db.accounts || []).find(
-    (a) => a.email === email && a.password === password
-  );
-  if (matchedAcc) return [matchedAcc];
-
-  return [];
+  const response = await axios.get(`${API_URL}/users`, {
+    params: { email }
+  });
+  const users = response.data || [];
+  return users.filter((u) => String(u.password) === String(password));
 };
 
+// Hàm đăng ký tài khoản mới (POST /users)
+export const registerAPI = async (userData) => {
+  const response = await axios.post(`${API_URL}/users`, {
+    ...userData,
+    role: userData.role || "customer"
+  });
+  return response.data;
+};
+
+/* ==========================================================================
+   2. QUẢN LÝ NGƯỜI DÙNG (USERS API - DÙNG CHO ADMIN)
+   ========================================================================== */
+// Lấy danh sách tất cả người dùng (GET /users)
+export const apiGetUsers = async () => {
+  const response = await axios.get(`${API_URL}/users`);
+  return response.data;
+};
+
+// Thêm người dùng mới (POST /users)
+export const apiCreateUser = async (userData) => {
+  const response = await axios.post(`${API_URL}/users`, userData);
+  return response.data;
+};
+
+// Cập nhật thông tin người dùng theo ID (PUT /users/:id)
+export const apiUpdateUser = async (id, updatedData) => {
+  const response = await axios.put(`${API_URL}/users/${id}`, updatedData);
+  return response.data;
+};
+
+// Xóa người dùng theo ID (DELETE /users/:id)
+export const apiDeleteUser = async (id) => {
+  const response = await axios.delete(`${API_URL}/users/${id}`);
+  return response.data;
+};
+
+/* ==========================================================================
+   3. QUẢN LÝ SẢN PHẨM & DANH MỤC (PRODUCTS & CATEGORIES API)
+   ========================================================================== */
+// Lấy danh sách tất cả sản phẩm (GET /products)
+export const apiGetProducts = async (params = {}) => {
+  const response = await axios.get(`${API_URL}/products`, { params });
+  return response.data;
+};
+
+// Thêm sản phẩm mới (POST /products) - Dùng trong trang Quản lý Admin
+export const apiCreateProduct = async (productData) => {
+  const response = await axios.post(`${API_URL}/products`, productData);
+  return response.data;
+};
+
+// Cập nhật thông tin sản phẩm theo ID (PUT /products/:id) - Dùng trong trang Admin
+export const apiUpdateProduct = async (id, updatedData) => {
+  const response = await axios.put(`${API_URL}/products/${id}`, updatedData);
+  return response.data;
+};
+
+// Xóa sản phẩm theo ID (DELETE /products/:id) - Dùng trong trang Admin
+export const apiDeleteProduct = async (id) => {
+  const response = await axios.delete(`${API_URL}/products/${id}`);
+  return response.data;
+};
+
+// Lấy danh sách các danh mục sản phẩm (GET /categories)
+export const apiGetCategories = async () => {
+  const response = await axios.get(`${API_URL}/categories`);
+  return response.data;
+};
+
+/* ==========================================================================
+   4. QUẢN LÝ GIỎ HÀNG (CARTS API)
+   ========================================================================== */
+// Lấy giỏ hàng theo mã người dùng userId (GET /carts?userId=1)
+export const apiGetCart = async (userId = 1) => {
+  const response = await axios.get(`${API_URL}/carts`, {
+    params: { userId }
+  });
+  return response.data;
+};
+
+// Cập nhật danh sách món trong giỏ hàng theo cartId (PUT /carts/:cartId)
+export const apiUpdateCart = async (cartId, cartData) => {
+  const response = await axios.put(`${API_URL}/carts/${cartId}`, cartData);
+  return response.data;
+};
+
+/* ==========================================================================
+   5. QUẢN LÝ ĐƠN HÀNG (ORDERS API)
+   ========================================================================== */
+// Lấy toàn bộ đơn hàng (GET /orders) - Dùng cho Admin quản lý & Báo cáo
+export const apiGetAllOrders = async () => {
+  const response = await axios.get(`${API_URL}/orders`);
+  return response.data;
+};
+
+// Lấy đơn hàng của người dùng cụ thể (GET /orders?userId=1) - Dùng cho Lịch sử đơn hàng
+export const apiGetOrders = async (userId = 1) => {
+  const response = await axios.get(`${API_URL}/orders`, {
+    params: { userId }
+  });
+  return response.data;
+};
+
+// Cập nhật trạng thái đơn hàng theo ID (PUT /orders/:id) - Dùng trong Admin
+export const apiUpdateOrder = async (id, updatedData) => {
+  const response = await axios.put(`${API_URL}/orders/${id}`, updatedData);
+  return response.data;
+};
+
+// Tạo đơn hàng mới sau khi khách hàng bấm Đặt Hàng (POST /orders)
+export const apiCreateOrder = async (orderData) => {
+  const response = await axios.post(`${API_URL}/orders`, orderData);
+  return response.data;
+};
